@@ -1,16 +1,15 @@
-export const TOP: 'TOP'
-export const TOP_RIGHT: 'TOP_RIGHT'
-export const RIGHT: 'RIGHT'
-export const BOTTOM_RIGHT: 'BOTTOM_RIGHT'
-export const BOTTOM: 'BOTTOM'
-export const BOTTOM_LEFT: 'BOTTOM_LEFT'
-export const LEFT: 'LEFT'
-export const TOP_LEFT: 'TOP_LEFT'
+export const TOP: 'TOP';
+export const TOP_RIGHT: 'TOP_RIGHT';
+export const RIGHT: 'RIGHT';
+export const BOTTOM_RIGHT: 'BOTTOM_RIGHT';
+export const BOTTOM: 'BOTTOM';
+export const BOTTOM_LEFT: 'BOTTOM_LEFT';
+export const LEFT: 'LEFT';
+export const TOP_LEFT: 'TOP_LEFT';
 
-type Direction = 'TOP' | 'TOP_RIGHT' | 'RIGHT' | 'BOTTOM_RIGHT' | 'BOTTOM' | 'BOTTOM_LEFT' | 'LEFT' | 'TOP_LEFT'
+type Direction = 'TOP' | 'TOP_RIGHT' | 'RIGHT' | 'BOTTOM_RIGHT' | 'BOTTOM' | 'BOTTOM_LEFT' | 'LEFT' | 'TOP_LEFT';
 
 export class js {
-
   /**
    * Sets the collision grid that EasyStar uses.
    *
@@ -18,28 +17,28 @@ export class js {
    * which tiles in your grid should be considered
    * acceptable, or "walkable".
    */
-  setAcceptableTiles(tiles: number[] | number): void
+  setAcceptableTiles(tiles: number[] | number): void;
 
   /**
    * Enables sync mode for this EasyStar instance..
    * if you're into that sort of thing.
    */
-  enableSync(): void
+  enableSync(): void;
 
   /**
    * Disables sync mode for this EasyStar instance.
    */
-  disableSync(): void
+  disableSync(): void;
 
   /**
    * Enable diagonal pathfinding.
    */
-  enableDiagonals(): void
+  enableDiagonals(): void;
 
   /**
    * Disable diagonal pathfinding.
    */
-  disableDiagonals(): void
+  disableDiagonals(): void;
 
   /**
    * Sets the collision grid that EasyStar uses.
@@ -47,7 +46,7 @@ export class js {
    * @param {Array} grid The collision grid that this EasyStar instance will read from.
    * This should be a 2D Array of Numbers.
    */
-  setGrid(grid: number[][]): void
+  setGrid(grid: number[][]): void;
 
   /**
    * Sets the tile cost for a particular tile type.
@@ -55,7 +54,7 @@ export class js {
    * @param {Number} The tile type to set the cost for.
    * @param {Number} The multiplicative cost associated with the given tile.
    */
-  setTileCost(tileType: number, cost: number): void
+  setTileCost(tileType: number, cost: number): void;
 
   /**
    * Sets the an additional cost for a particular point.
@@ -65,7 +64,7 @@ export class js {
    * @param {Number} y The y value of the point to cost.
    * @param {Number} The multiplicative cost associated with the given point.
    */
-  setAdditionalPointCost(x: number, y: number, cost: number): void
+  setAdditionalPointCost(x: number, y: number, cost: number): void;
 
   /**
    * Remove the additional cost for a particular point.
@@ -73,12 +72,12 @@ export class js {
    * @param {Number} x The x value of the point to stop costing.
    * @param {Number} y The y value of the point to stop costing.
    */
-  removeAdditionalPointCost(x: number, y: number): void
+  removeAdditionalPointCost(x: number, y: number): void;
 
   /**
    * Remove all additional point costs.
    */
-  removeAllAdditionalPointCosts(): void
+  removeAllAdditionalPointCosts(): void;
 
   /**
    * Sets the number of search iterations per calculation.
@@ -88,7 +87,7 @@ export class js {
    *
    * @param {Number} iterations The number of searches to prefrom per calculate() call.
    */
-  setIterationsPerCalculation(iterations: number): void
+  setIterationsPerCalculation(iterations: number): void;
 
   /**
    * Avoid a particular point on the grid,
@@ -97,7 +96,7 @@ export class js {
    * @param {Number} x The x value of the point to avoid.
    * @param {Number} y The y value of the point to avoid.
    */
-  avoidAdditionalPoint(x: number, y: number): void
+  avoidAdditionalPoint(x: number, y: number): void;
 
   /**
    * Stop avoiding a particular point on the grid.
@@ -105,22 +104,22 @@ export class js {
    * @param {Number} x The x value of the point to stop avoiding.
    * @param {Number} y The y value of the point to stop avoiding.
    */
-  stopAvoidingAdditionalPoint(x: number, y: number): void
+  stopAvoidingAdditionalPoint(x: number, y: number): void;
 
   /**
    * Enables corner cutting in diagonal movement.
    */
-  enableCornerCutting(): void
+  enableCornerCutting(): void;
 
   /**
    * Disables corner cutting in diagonal movement.
    */
-  disableCornerCutting(): void
+  disableCornerCutting(): void;
 
   /**
    * Stop avoiding all additional points on the grid.
    */
-  stopAvoidingAllAdditionalPoints(): void
+  stopAvoidingAllAdditionalPoints(): void;
 
   /**
    * Find a path.
@@ -134,7 +133,13 @@ export class js {
    * @return {Number} A numeric, non-zero value which identifies the created instance. This value can be passed to cancelPath to cancel the path calculation.
    *
    */
-  findPath(startX: number, startY: number, endX: number, endY: number, callback: (path: { x: number, y: number }[]) => void): number
+  findPath(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    callback: (path: {x: number; y: number}[]) => void,
+  ): number;
 
   /**
    * Cancel a path calculation.
@@ -143,7 +148,7 @@ export class js {
    * @return {Boolean} True if an instance was found and cancelled.
    *
    **/
-  cancelPath(instanceId: number): boolean
+  cancelPath(instanceId: number): boolean;
 
   /**
    * This method steps through the A* Algorithm in an attempt to
@@ -151,7 +156,7 @@ export class js {
    * You can change the number of calculations done in a call by using
    * easystar.setIteratonsPerCalculation().
    */
-  calculate(): void
+  calculate(): void;
 
   /**
    * Sets a directional condition on a tile
@@ -162,10 +167,23 @@ export class js {
    *
    * eg. easystar.setDirectionalCondition(1, 1, ['TOP']): You can only access the tile by walking down onto it,
    */
-  setDirectionalCondition(x: number, y: number, allowedDirections: Direction[]): void
+  setDirectionalCondition(x: number, y: number, allowedDirections: Direction[]): void;
 
   /**
    * Remove all directional conditions
    */
-  removeAllDirectionalConditions(): void
+  removeAllDirectionalConditions(): void;
+
+  /**
+   * Sets the multiplier determining the importance of the manhattan heuristics
+   * @param {Number} factor
+   **/
+  setHeuristicsFactor(factor: number): void;
+
+  /**
+   * Sets the added cost for making a turn
+   * Higer value means less turns
+   * @param {Number} factor
+   **/
+  setTurnPenalty(factor: number): void;
 }

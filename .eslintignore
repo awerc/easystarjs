@@ -2,3 +2,4 @@
 .eslintrc.js
 prettier.config.js
 bin
+index.d.ts

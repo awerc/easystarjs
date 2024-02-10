@@ -35,6 +35,8 @@ EasyStar.js = function js() {
   let iterationsPerCalculation = Number.MAX_VALUE;
   let acceptableTiles;
   let diagonalsEnabled = false;
+  let turnPenalty = 0;
+  let heuristicsFactor = 1;
 
   /**
    * Sets the collision grid that EasyStar uses.
@@ -227,6 +229,23 @@ EasyStar.js = function js() {
   };
 
   /**
+   * Sets the multiplier determining the importance of the manhattan heuristics
+   * @param {Number} factor
+   * */
+  this.setHeuristicsFactor = function setHeuristicsFactor(factor) {
+    heuristicsFactor = factor;
+  };
+
+  /**
+   * Sets the added cost for making a turn
+   * Higer value means less turns
+   * @param {Number} penalty
+   * */
+  this.setTurnPenalty = function setTurnPenalty(penalty) {
+    turnPenalty = penalty;
+  };
+
+  /**
    * -1, -1 | 0, -1  | 1, -1
    * -1,  0 | SOURCE | 1,  0
    * -1,  1 | 0,  1  | 1,  1
@@ -283,7 +302,7 @@ EasyStar.js = function js() {
     // Manhattan distance
     const dx = Math.abs(x1 - x2);
     const dy = Math.abs(y1 - y2);
-    return dx + dy;
+    return heuristicsFactor * (dx + dy);
   };
 
   const coordinateToNode = function coordinateToNode(instance, x, y, parent, cost) {
@@ -295,13 +314,19 @@ EasyStar.js = function js() {
       instance.nodeHash[y] = {};
     }
     const simpleDistanceToTarget = getDistance(x, y, instance.endX, instance.endY);
-    let costSoFar;
+    let costSoFar = 0;
+    let directionFromParent = 'NONE';
+    let turnPenaltyCost = 0;
     if (parent !== null) {
-      costSoFar = parent.costSoFar + cost;
+      directionFromParent = calculateDirection(x - parent.x, y - parent.y);
+      if (parent.directionFromParent !== directionFromParent) {
+        turnPenaltyCost = turnPenalty;
+      }
+      costSoFar = parent.costSoFar + cost + turnPenaltyCost;
     } else {
       costSoFar = 0;
     }
-    const node = new Node(parent, x, y, costSoFar, simpleDistanceToTarget);
+    const node = new Node(parent, x, y, costSoFar, simpleDistanceToTarget, directionFromParent);
     instance.nodeHash[y][x] = node;
     return node;
   };
