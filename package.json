@@ -1,11 +1,11 @@
 {
     "name": "@kuith/easystarjs",
-    "version": "0.5.4",
+    "version": "0.5.8",
     "main": "./src/easystar.js",
     "typings": "./index.d.ts",
     "description": "Asynchronous A* Pathfinding API",
     "scripts": {
-        "build:production": "webpack --env production && webpack --env production --env minify",
+        "build:production": "rm -rf ./bin/* && webpack --env production && webpack --env production --env minify",
         "test:production": "karma start ./karma.conf.js",
         "benchmark": "karma start ./karma.benchmark.conf.js",
         "dev": "webpack --development && karma start ./karma.conf.js --development",

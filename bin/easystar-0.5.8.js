@@ -35,7 +35,7 @@ var EasyStar;
  *
  *   Implementation By Bryce Neal (@prettymuchbryce)
  * */
-var EasyStar={},Heap=__webpack_require__(416),Instance=__webpack_require__(296),Node=__webpack_require__(543),Heuristics=__webpack_require__(272),_require=__webpack_require__(528),compressPath=_require.compressPath,smoothenPath=_require.smoothenPath,expandPath=_require.expandPath;module.exports=EasyStar;var nextInstanceId=1;EasyStar.js=function(){var collisionGrid,iterationsSoFar,acceptableTiles,DIAGONAL_COST=Math.SQRT2,syncEnabled=!1,pointsToAvoid={},costMap={},pointsToCost={},directionalConditions={},allowCornerCutting=!0,instances={},instanceQueue=[],iterationsPerCalculation=Number.MAX_VALUE,diagonalsEnabled=!1,turnPenalty=0,heuristicsFactor=1,orthogonalHeuristic=Heuristics.manhattan,diagonalHeuristic=Heuristics.octile,directionCosts=[[1,1,1],[1,0,1],[1,1,1]];
+var EasyStar={},Heap=__webpack_require__(416),Instance=__webpack_require__(296),Node=__webpack_require__(543),Heuristics=__webpack_require__(272),_require=__webpack_require__(528),compressPath=_require.compressPath,smoothenPath=_require.smoothenPath,expandPath=_require.expandPath,interpolate=_require.interpolate;module.exports=EasyStar;var nextInstanceId=1;EasyStar.js=function(){var collisionGrid,iterationsSoFar,acceptableTiles,DIAGONAL_COST=Math.SQRT2,syncEnabled=!1,pointsToAvoid={},costMap={},pointsToCost={},directionalConditions={},allowCornerCutting=!0,instances={},instanceQueue=[],iterationsPerCalculation=Number.MAX_VALUE,diagonalsEnabled=!1,turnPenalty=0,heuristicsFactor=1,orthogonalHeuristic=Heuristics.manhattan,diagonalHeuristic=Heuristics.octile,directionCosts=[[1,1,1],[1,0,1],[1,1,1]];
 /**
    * Sets the collision grid that EasyStar uses.
    *
@@ -232,7 +232,7 @@ if(0!==instance.openList.size()){var searchNode=instance.openList.pop();
 // Handles the case where we have found the destination
 if(instance.endX!==searchNode.x||instance.endY!==searchNode.y){if(searchNode.list=0,searchNode.y>0){var directionCost=getDirectionCost(0,-1);checkAdjacentNode(instance,searchNode,0,-1,1*directionCost*getTileCost(searchNode.x,searchNode.y-1))}if(searchNode.x<collisionGrid[0].length-1){var _directionCost=getDirectionCost(1,0);checkAdjacentNode(instance,searchNode,1,0,1*_directionCost*getTileCost(searchNode.x+1,searchNode.y))}if(searchNode.y<collisionGrid.length-1){var _directionCost2=getDirectionCost(0,1);checkAdjacentNode(instance,searchNode,0,1,1*_directionCost2*getTileCost(searchNode.x,searchNode.y+1))}if(searchNode.x>0){var _directionCost3=getDirectionCost(-1,0);checkAdjacentNode(instance,searchNode,-1,0,1*_directionCost3*getTileCost(searchNode.x-1,searchNode.y))}if(diagonalsEnabled){if(searchNode.x>0&&searchNode.y>0&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost4=getDirectionCost(-1,-1);checkAdjacentNode(instance,searchNode,-1,-1,DIAGONAL_COST*_directionCost4*getTileCost(searchNode.x-1,searchNode.y-1))}if(searchNode.x<collisionGrid[0].length-1&&searchNode.y<collisionGrid.length-1&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost5=getDirectionCost(1,1);checkAdjacentNode(instance,searchNode,1,1,DIAGONAL_COST*_directionCost5*getTileCost(searchNode.x+1,searchNode.y+1))}if(searchNode.x<collisionGrid[0].length-1&&searchNode.y>0&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost6=getDirectionCost(1,-1);checkAdjacentNode(instance,searchNode,1,-1,DIAGONAL_COST*_directionCost6*getTileCost(searchNode.x+1,searchNode.y-1))}if(searchNode.x>0&&searchNode.y<collisionGrid.length-1&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost7=getDirectionCost(-1,1);checkAdjacentNode(instance,searchNode,-1,1,DIAGONAL_COST*_directionCost7*getTileCost(searchNode.x-1,searchNode.y+1))}}}else{var path=[];path.push({x:searchNode.x,y:searchNode.y});for(var parent=searchNode.parent;null!=parent;)path.push({x:parent.x,y:parent.y}),parent=parent.parent;path.reverse(),instance.callback(path),delete instances[instanceId],instanceQueue.shift()}}else instance.callback(null),delete instances[instanceId],instanceQueue.shift();else
 // This instance was cancelled
-instanceQueue.shift()}}},EasyStar.TOP=1,EasyStar.TOP_RIGHT=2,EasyStar.RIGHT=4,EasyStar.BOTTOM_RIGHT=8,EasyStar.BOTTOM=16,EasyStar.BOTTOM_LEFT=32,EasyStar.LEFT=64,EasyStar.TOP_LEFT=128,EasyStar.Heuristics=Heuristics,EasyStar.compressPath=compressPath,EasyStar.smoothenPath=smoothenPath,EasyStar.expandPath=expandPath}
+instanceQueue.shift()}}},EasyStar.TOP=1,EasyStar.TOP_RIGHT=2,EasyStar.RIGHT=4,EasyStar.BOTTOM_RIGHT=8,EasyStar.BOTTOM=16,EasyStar.BOTTOM_LEFT=32,EasyStar.LEFT=64,EasyStar.TOP_LEFT=128,EasyStar.Heuristics=Heuristics,EasyStar.compressPath=compressPath,EasyStar.smoothenPath=smoothenPath,EasyStar.expandPath=expandPath,EasyStar.interpolate=interpolate}
 /***/,
 /***/272:
 /***/module=>{
@@ -294,7 +294,7 @@ function Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent){t
  * */Node.prototype.bestGuessDistance=function(){return this.costSoFar+this.simpleDistanceToTarget},module.exports=Node}
 /***/,
 /***/528:
-/***/(__unused_webpack_module,exports)=>{
+/***/(__unused_webpack_module,exports)=>{function _toConsumableArray(arr){return function(arr){if(Array.isArray(arr))return _arrayLikeToArray(arr)}(arr)||function(iter){if("undefined"!=typeof Symbol&&null!=iter[Symbol.iterator]||null!=iter["@@iterator"])return Array.from(iter)}(arr)||function(o,minLen){if(!o)return;if("string"==typeof o)return _arrayLikeToArray(o,minLen);var n=Object.prototype.toString.call(o).slice(8,-1);"Object"===n&&o.constructor&&(n=o.constructor.name);if("Map"===n||"Set"===n)return Array.from(o);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return _arrayLikeToArray(o,minLen)}(arr)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function _arrayLikeToArray(arr,len){(null==len||len>arr.length)&&(len=arr.length);for(var i=0,arr2=new Array(len);i<len;i++)arr2[i]=arr[i];return arr2}
 /**
  * Given the start and end coordinates, return all the coordinates lying
  * on the line formed by these coordinates, based on Bresenham's algorithm.
@@ -303,9 +303,8 @@ function Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent){t
  * @param {number} y0 Start y coordinate
  * @param {number} x1 End x coordinate
  * @param {number} y1 End y coordinate
- * @return {Array<Array<number>>} The coordinates on the line
- */
-function interpolate(x0,y0,x1,y1){var err,e2,x=x0,y=y0,abs=Math.abs,line=[],dx=abs(x1-x),dy=abs(y1-y),sx=x<x1?1:-1,sy=y<y1?1:-1;for(err=dx-dy;line.push({x,y}),x!==x1||y!==y1;)(e2=2*err)>-dy&&(err-=dy,x+=sx),e2<dx&&(err+=dx,y+=sy);return line}exports.interpolate=interpolate,exports.expandPath=
+ * @return {Array<{x: number, y: number}>} The coordinates on the line
+ */function interpolate(x0,y0,x1,y1){var err,e2,x=x0,y=y0,abs=Math.abs,line=[],dx=abs(x1-x),dy=abs(y1-y),sx=x<x1?1:-1,sy=y<y1?1:-1;for(err=dx-dy;line.push({x,y}),x!==x1||y!==y1;)(e2=2*err)>-dy&&(err-=dy,x+=sx),e2<dx&&(err+=dx,y+=sy);return line}exports.interpolate=interpolate,exports.expandPath=
 /**
  * Given a compressed path, return a new path that has all the segments
  * in it interpolated.
@@ -320,7 +319,8 @@ function(path){var coord0,coord1,interpolated,interpolatedLen,i,j,expanded=[],le
  * @param {Array<{x: number, y: number}>} path The path
  * @param {Array<number>} walkable Walkable ids
  */
-function(grid,path,walkable){var sx,sy,i,j,coord,line,testCoord,blocked,lastValidCoord,len=path.length,x0=path[0].x,y0=path[0].y,x1=path[len-1].x,y1=path[len-1].y,newPath=[{x:sx=x0,y:sy=y0}];for(i=2;i<len;++i){for(line=interpolate(sx,sy,(coord=path[i]).x,coord.y),blocked=!1,j=1;j<line.length;++j)if(testCoord=line[j],-1===walkable.indexOf(grid[testCoord.x][testCoord.y])){blocked=!0;break}blocked&&(lastValidCoord=path[i-1],newPath.push(lastValidCoord),sx=lastValidCoord.x,sy=lastValidCoord.y)}return newPath.push({x:x1,y:y1}),newPath},exports.compressPath=
+function(grid,path,walkable){for(var newPath=_toConsumableArray(path),i=1;i<newPath.length-1;i++)for(var _newPath=newPath[i-1],x1=_newPath.x,y1=_newPath.y,_newPath$i=newPath[i],x2=_newPath$i.x,y2=_newPath$i.y,dx=x2-x1,dy=y2-y1,testCoord={x:x2+dx,y:y2+dy},j=i+2;j<newPath.length;j++){var current=newPath[j],curDx=testCoord.x-current.x,curDy=testCoord.y-current.y;if(!(testCoord.x!==current.x&&testCoord.y!==current.y&&Math.abs(curDx)!==Math.abs(curDy)||Math.sign(dx*dy)*Math.sign(curDx*curDy)==-1||0===Math.sign(dx*dy)&&0===Math.sign(curDx*curDy))){var line=interpolate(testCoord.x,testCoord.y,current.x,current.y);if(line.length===j-i&&
+line.every((function(point){return walkable.includes(grid[point.y][point.x])}))){newPath.splice.apply(newPath,[i+1,line.length].concat(_toConsumableArray(line)));break}}}return newPath},exports.compressPath=
 /**
  * Compress a path, remove redundant nodes without altering the shape
  * The original path is not modified

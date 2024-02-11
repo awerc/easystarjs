@@ -12,7 +12,7 @@ const Heap = require('heap');
 const Instance = require('./instance');
 const Node = require('./node');
 const Heuristics = require('./heuristics');
-const {compressPath, smoothenPath, expandPath} = require('./util');
+const {compressPath, smoothenPath, expandPath, interpolate} = require('./util');
 
 const CLOSED_LIST = 0;
 const OPEN_LIST = 1;
@@ -662,3 +662,4 @@ EasyStar.Heuristics = Heuristics;
 EasyStar.compressPath = compressPath;
 EasyStar.smoothenPath = smoothenPath;
 EasyStar.expandPath = expandPath;
+EasyStar.interpolate = interpolate;

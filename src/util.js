@@ -6,7 +6,7 @@
  * @param {number} y0 Start y coordinate
  * @param {number} x1 End x coordinate
  * @param {number} y1 End y coordinate
- * @return {Array<Array<number>>} The coordinates on the line
+ * @return {Array<{x: number, y: number}>} The coordinates on the line
  */
 function interpolate(x0, y0, x1, y1) {
   let x = x0;
@@ -90,50 +90,40 @@ exports.expandPath = expandPath;
  * @param {Array<number>} walkable Walkable ids
  */
 function smoothenPath(grid, path, walkable) {
-  const len = path.length;
-  const x0 = path[0].x; // path start x
-  const y0 = path[0].y; // path start y
-  const x1 = path[len - 1].x; // path end x
-  const y1 = path[len - 1].y; // path end y
-  let sx;
-  let sy; // current start coordinate
-  let ex;
-  let ey; // current end coordinate
-  let i;
-  let j;
-  let coord;
-  let line;
-  let testCoord;
-  let blocked;
-  let lastValidCoord;
+  const newPath = [...path];
 
-  sx = x0;
-  sy = y0;
-  const newPath = [{x: sx, y: sy}];
+  for (let i = 1; i < newPath.length - 1; i++) {
+    const {x: x1, y: y1} = newPath[i - 1];
+    const {x: x2, y: y2} = newPath[i];
+    const dx = x2 - x1;
+    const dy = y2 - y1;
 
-  for (i = 2; i < len; ++i) {
-    coord = path[i];
-    ex = coord.x;
-    ey = coord.y;
-    line = interpolate(sx, sy, ex, ey);
+    const testCoord = {x: x2 + dx, y: y2 + dy};
 
-    blocked = false;
-    for (j = 1; j < line.length; ++j) {
-      testCoord = line[j];
+    for (let j = i + 2; j < newPath.length; j++) {
+      const current = newPath[j];
 
-      if (walkable.indexOf(grid[testCoord.x][testCoord.y]) === -1) {
-        blocked = true;
-        break;
+      const curDx = testCoord.x - current.x;
+      const curDy = testCoord.y - current.y;
+
+      if (
+        (testCoord.x === current.x || testCoord.y === current.y || Math.abs(curDx) === Math.abs(curDy)) &&
+        Math.sign(dx * dy) * Math.sign(curDx * curDy) !== -1 &&
+        !(Math.sign(dx * dy) === 0 && Math.sign(curDx * curDy) === 0)
+      ) {
+        const line = interpolate(testCoord.x, testCoord.y, current.x, current.y);
+
+        const isValidLine =
+          line.length === j - i && //
+          line.every(point => walkable.includes(grid[point.y][point.x]));
+
+        if (isValidLine) {
+          newPath.splice(i + 1, line.length, ...line);
+          break;
+        }
       }
     }
-    if (blocked) {
-      lastValidCoord = path[i - 1];
-      newPath.push(lastValidCoord);
-      sx = lastValidCoord.x;
-      sy = lastValidCoord.y;
-    }
   }
-  newPath.push({x: x1, y: y1});
 
   return newPath;
 }

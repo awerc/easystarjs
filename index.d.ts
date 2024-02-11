@@ -14,6 +14,7 @@ export const Heuristics: {
   euclidean: (dx: number, dy: number) => number;
 };
 
+export const interpolate: (x0: number, y0: number, x1: number, y1: number) => {x: number; y: number}[];
 export const compressPath: (path: {x: number; y: number}[], maxCompressedLength: number) => {x: number; y: number}[];
 export const expandPath: (path: {x: number; y: number}[]) => {x: number; y: number}[];
 export const smoothenPath: (
