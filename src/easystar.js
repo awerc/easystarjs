@@ -168,7 +168,11 @@ EasyStar.js = function js() {
     if (directionalConditions[y] === undefined) {
       directionalConditions[y] = {};
     }
-    directionalConditions[y][x] = allowedDirections;
+    directionalConditions[y][x] = allowedDirections
+      // eslint-disable-next-line no-bitwise
+      .map(c => c | 0) // force integer
+      // eslint-disable-next-line no-bitwise
+      .reduce((p, c) => p | c, 0);
   };
 
   /**
@@ -296,23 +300,13 @@ EasyStar.js = function js() {
   // eslint-disable-next-line no-shadow
   const isTileWalkable = function isTileWalkable(collisionGrid, acceptableTiles, x, y, sourceNode) {
     const directionalCondition = directionalConditions[y] && directionalConditions[y][x];
-    if (directionalCondition) {
+    if (directionalCondition !== undefined) {
       const direction = calculateDirection(sourceNode.x - x, sourceNode.y - y);
-      const directionIncluded = function directionIncluded() {
-        for (let i = 0; i < directionalCondition.length; i++) {
-          if (directionalCondition[i] === direction) return true;
-        }
-        return false;
-      };
-      if (!directionIncluded()) return false;
-    }
-    for (let i = 0; i < acceptableTiles.length; i++) {
-      if (collisionGrid[y][x] === acceptableTiles[i]) {
-        return true;
-      }
+      // eslint-disable-next-line no-bitwise
+      return (direction & directionalCondition) > 0;
     }
 
-    return false;
+    return acceptableTiles.indexOf(collisionGrid[y][x]) !== -1;
   };
 
   const getTileCost = function getTileCost(x, y) {
@@ -654,14 +648,14 @@ EasyStar.js = function js() {
   };
 };
 
-EasyStar.TOP = 'TOP';
-EasyStar.TOP_RIGHT = 'TOP_RIGHT';
-EasyStar.RIGHT = 'RIGHT';
-EasyStar.BOTTOM_RIGHT = 'BOTTOM_RIGHT';
-EasyStar.BOTTOM = 'BOTTOM';
-EasyStar.BOTTOM_LEFT = 'BOTTOM_LEFT';
-EasyStar.LEFT = 'LEFT';
-EasyStar.TOP_LEFT = 'TOP_LEFT';
+EasyStar.TOP = 1;
+EasyStar.TOP_RIGHT = 2;
+EasyStar.RIGHT = 4;
+EasyStar.BOTTOM_RIGHT = 8;
+EasyStar.BOTTOM = 16;
+EasyStar.BOTTOM_LEFT = 32;
+EasyStar.LEFT = 64;
+EasyStar.TOP_LEFT = 128;
 
 EasyStar.Heuristics = Heuristics;
 

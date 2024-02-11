@@ -7,18 +7,20 @@
  * @param {Number} simpleDistanceToTarget Manhatten distance to the end point.
  * @param {String} directionFromParent
  * */
-module.exports = function node(parent, x, y, costSoFar, simpleDistanceToTarget, directionFromParent) {
+function Node(parent, x, y, costSoFar, simpleDistanceToTarget, directionFromParent) {
   this.parent = parent;
   this.x = x;
   this.y = y;
   this.costSoFar = costSoFar;
   this.simpleDistanceToTarget = simpleDistanceToTarget;
   this.directionFromParent = directionFromParent;
+}
 
-  /**
-   * @return {Number} Best guess distance of a cost using this node.
-   * */
-  this.bestGuessDistance = function bestGuessDistance() {
-    return this.costSoFar + this.simpleDistanceToTarget;
-  };
+/**
+ * @return {Number} Best guess distance of a cost using this node.
+ * */
+Node.prototype.bestGuessDistance = function bestGuessDistance() {
+  return this.costSoFar + this.simpleDistanceToTarget;
 };
+
+module.exports = Node;
