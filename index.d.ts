@@ -7,6 +7,21 @@ export const BOTTOM_LEFT: 'BOTTOM_LEFT';
 export const LEFT: 'LEFT';
 export const TOP_LEFT: 'TOP_LEFT';
 
+export const Heuristics: {
+  manhattan: (dx: number, dy: number) => number;
+  octile: (dx: number, dy: number) => number;
+  chebyshev: (dx: number, dy: number) => number;
+  euclidean: (dx: number, dy: number) => number;
+};
+
+export const compressPath: (path: {x: number; y: number}[], maxCompressedLength: number) => {x: number; y: number}[];
+export const expandPath: (path: {x: number; y: number}[]) => {x: number; y: number}[];
+export const smoothenPath: (
+  grid: number[][],
+  path: {x: number; y: number}[],
+  walkable: number[],
+) => {x: number; y: number}[];
+
 type Direction = 'TOP' | 'TOP_RIGHT' | 'RIGHT' | 'BOTTOM_RIGHT' | 'BOTTOM' | 'BOTTOM_LEFT' | 'LEFT' | 'TOP_LEFT';
 
 export class js {
@@ -51,8 +66,8 @@ export class js {
   /**
    * Sets the tile cost for a particular tile type.
    *
-   * @param {Number} The tile type to set the cost for.
-   * @param {Number} The multiplicative cost associated with the given tile.
+   * @param {Number} tileType The tile type to set the cost for.
+   * @param {Number} cost The multiplicative cost associated with the given tile.
    */
   setTileCost(tileType: number, cost: number): void;
 
@@ -62,7 +77,7 @@ export class js {
    *
    * @param {Number} x The x value of the point to cost.
    * @param {Number} y The y value of the point to cost.
-   * @param {Number} The multiplicative cost associated with the given point.
+   * @param {Number} cost The multiplicative cost associated with the given point.
    */
   setAdditionalPointCost(x: number, y: number, cost: number): void;
 
@@ -90,8 +105,24 @@ export class js {
   setIterationsPerCalculation(iterations: number): void;
 
   /**
+   * Set heuristic functions for calculating node distance
+   * @param {Function} orthogonal Function for calculating the orthogonal node distance.
+   * @param {Function} diagonal  Function for calculating the diagonal node distance.
+   */
+  setHeuristics(orthogonal: (dx: number, dy: number) => number, diagonal: (dx: number, dy: number) => number): void;
+
+  /**
+   * Set costs for different directions
+   * @param {Array<Array<number>>} costs Two dimensional array with direction costs. Example:
+   * [1.0, 1.0, 1.0],
+   * [1.0,   0, 1.0],
+   * [1.0, 1.0, 1.0],
+   */
+  setDirectionCosts(costs: number[][]): void;
+
+  /**
    * Avoid a particular point on the grid,
-   * regardless of whether or not it is an acceptable tile.
+   * regardless of whether it is an acceptable tile.
    *
    * @param {Number} x The x value of the point to avoid.
    * @param {Number} y The y value of the point to avoid.

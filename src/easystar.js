@@ -11,6 +11,8 @@ const EasyStar = {};
 const Heap = require('heap');
 const Instance = require('./instance');
 const Node = require('./node');
+const Heuristics = require('./heuristics');
+const {compressPath, smoothenPath, expandPath} = require('./util');
 
 const CLOSED_LIST = 0;
 const OPEN_LIST = 1;
@@ -21,7 +23,7 @@ let nextInstanceId = 1;
 
 EasyStar.js = function js() {
   const STRAIGHT_COST = 1.0;
-  const DIAGONAL_COST = 1.4;
+  const DIAGONAL_COST = Math.SQRT2;
   let syncEnabled = false;
   let pointsToAvoid = {};
   let collisionGrid;
@@ -37,6 +39,13 @@ EasyStar.js = function js() {
   let diagonalsEnabled = false;
   let turnPenalty = 0;
   let heuristicsFactor = 1;
+  let orthogonalHeuristic = Heuristics.manhattan;
+  let diagonalHeuristic = Heuristics.octile;
+  let directionCosts = [
+    [1.0, 1.0, 1.0],
+    [1.0, 0, 1.0],
+    [1.0, 1.0, 1.0],
+  ];
 
   /**
    * Sets the collision grid that EasyStar uses.
@@ -182,8 +191,29 @@ EasyStar.js = function js() {
   };
 
   /**
+   * Set heuristic function for calculating node distance
+   * @param {Function} orthogonal Function for calculating the orthogonal node distance.
+   * @param {Function} diagonal  Function for calculating the diagonal node distance.
+   */
+  this.setHeuristics = function setHeuristics(orthogonal, diagonal) {
+    orthogonalHeuristic = orthogonal || Heuristics.manhattan;
+    diagonalHeuristic = diagonal || Heuristics.euclidean;
+  };
+
+  /**
+   * Set costs for different directions
+   * @param {Array<Array<number>>} costs Two dimensional array with direction costs. Example:
+   * [1.0, 1.0, 1.0],
+   * [1.0,   0, 1.0],
+   * [1.0, 1.0, 1.0],
+   */
+  this.setDirectionCosts = function setDirectionCosts(costs) {
+    directionCosts = costs || directionCosts;
+  };
+
+  /**
    * Avoid a particular point on the grid,
-   * regardless of whether or not it is an acceptable tile.
+   * regardless of whether it is an acceptable tile.
    *
    * @param {Number} x The x value of the point to avoid.
    * @param {Number} y The y value of the point to avoid.
@@ -289,20 +319,19 @@ EasyStar.js = function js() {
     return (pointsToCost[y] && pointsToCost[y][x]) || costMap[collisionGrid[y][x]];
   };
 
+  const getDirectionCost = function getDirectionCost(dx, dy) {
+    return directionCosts[1 + dy][1 + dx];
+  };
+
   const getDistance = function getDistance(x1, y1, x2, y2) {
-    if (diagonalsEnabled) {
-      // Octile distance
-      const dx = Math.abs(x1 - x2);
-      const dy = Math.abs(y1 - y2);
-      if (dx < dy) {
-        return DIAGONAL_COST * dx + dy;
-      }
-      return DIAGONAL_COST * dy + dx;
-    }
-    // Manhattan distance
     const dx = Math.abs(x1 - x2);
     const dy = Math.abs(y1 - y2);
-    return heuristicsFactor * (dx + dy);
+    if (diagonalsEnabled) {
+      // Octile distance
+      return heuristicsFactor * diagonalHeuristic(dx, dy);
+    }
+    // Manhattan distance
+    return heuristicsFactor * orthogonalHeuristic(dx, dy);
   };
 
   const coordinateToNode = function coordinateToNode(instance, x, y, parent, cost) {
@@ -314,7 +343,7 @@ EasyStar.js = function js() {
       instance.nodeHash[y] = {};
     }
     const simpleDistanceToTarget = getDistance(x, y, instance.endX, instance.endY);
-    let costSoFar = 0;
+    let costSoFar;
     let directionFromParent = 'NONE';
     let turnPenaltyCost = 0;
     if (parent !== null) {
@@ -516,16 +545,44 @@ EasyStar.js = function js() {
       searchNode.list = CLOSED_LIST;
 
       if (searchNode.y > 0) {
-        checkAdjacentNode(instance, searchNode, 0, -1, STRAIGHT_COST * getTileCost(searchNode.x, searchNode.y - 1));
+        const directionCost = getDirectionCost(0, -1);
+        checkAdjacentNode(
+          instance,
+          searchNode,
+          0,
+          -1,
+          STRAIGHT_COST * directionCost * getTileCost(searchNode.x, searchNode.y - 1),
+        );
       }
       if (searchNode.x < collisionGrid[0].length - 1) {
-        checkAdjacentNode(instance, searchNode, 1, 0, STRAIGHT_COST * getTileCost(searchNode.x + 1, searchNode.y));
+        const directionCost = getDirectionCost(1, 0);
+        checkAdjacentNode(
+          instance,
+          searchNode,
+          1,
+          0,
+          STRAIGHT_COST * directionCost * getTileCost(searchNode.x + 1, searchNode.y),
+        );
       }
       if (searchNode.y < collisionGrid.length - 1) {
-        checkAdjacentNode(instance, searchNode, 0, 1, STRAIGHT_COST * getTileCost(searchNode.x, searchNode.y + 1));
+        const directionCost = getDirectionCost(0, 1);
+        checkAdjacentNode(
+          instance,
+          searchNode,
+          0,
+          1,
+          STRAIGHT_COST * directionCost * getTileCost(searchNode.x, searchNode.y + 1),
+        );
       }
       if (searchNode.x > 0) {
-        checkAdjacentNode(instance, searchNode, -1, 0, STRAIGHT_COST * getTileCost(searchNode.x - 1, searchNode.y));
+        const directionCost = getDirectionCost(-1, 0);
+        checkAdjacentNode(
+          instance,
+          searchNode,
+          -1,
+          0,
+          STRAIGHT_COST * directionCost * getTileCost(searchNode.x - 1, searchNode.y),
+        );
       }
       if (diagonalsEnabled) {
         if (searchNode.x > 0 && searchNode.y > 0) {
@@ -534,12 +591,13 @@ EasyStar.js = function js() {
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y - 1, searchNode) &&
               isTileWalkable(collisionGrid, acceptableTiles, searchNode.x - 1, searchNode.y, searchNode))
           ) {
+            const directionCost = getDirectionCost(-1, -1);
             checkAdjacentNode(
               instance,
               searchNode,
               -1,
               -1,
-              DIAGONAL_COST * getTileCost(searchNode.x - 1, searchNode.y - 1),
+              DIAGONAL_COST * directionCost * getTileCost(searchNode.x - 1, searchNode.y - 1),
             );
           }
         }
@@ -549,12 +607,13 @@ EasyStar.js = function js() {
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y + 1, searchNode) &&
               isTileWalkable(collisionGrid, acceptableTiles, searchNode.x + 1, searchNode.y, searchNode))
           ) {
+            const directionCost = getDirectionCost(1, 1);
             checkAdjacentNode(
               instance,
               searchNode,
               1,
               1,
-              DIAGONAL_COST * getTileCost(searchNode.x + 1, searchNode.y + 1),
+              DIAGONAL_COST * directionCost * getTileCost(searchNode.x + 1, searchNode.y + 1),
             );
           }
         }
@@ -564,12 +623,13 @@ EasyStar.js = function js() {
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y - 1, searchNode) &&
               isTileWalkable(collisionGrid, acceptableTiles, searchNode.x + 1, searchNode.y, searchNode))
           ) {
+            const directionCost = getDirectionCost(1, -1);
             checkAdjacentNode(
               instance,
               searchNode,
               1,
               -1,
-              DIAGONAL_COST * getTileCost(searchNode.x + 1, searchNode.y - 1),
+              DIAGONAL_COST * directionCost * getTileCost(searchNode.x + 1, searchNode.y - 1),
             );
           }
         }
@@ -579,12 +639,13 @@ EasyStar.js = function js() {
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y + 1, searchNode) &&
               isTileWalkable(collisionGrid, acceptableTiles, searchNode.x - 1, searchNode.y, searchNode))
           ) {
+            const directionCost = getDirectionCost(-1, 1);
             checkAdjacentNode(
               instance,
               searchNode,
               -1,
               1,
-              DIAGONAL_COST * getTileCost(searchNode.x - 1, searchNode.y + 1),
+              DIAGONAL_COST * directionCost * getTileCost(searchNode.x - 1, searchNode.y + 1),
             );
           }
         }
@@ -601,3 +662,9 @@ EasyStar.BOTTOM = 'BOTTOM';
 EasyStar.BOTTOM_LEFT = 'BOTTOM_LEFT';
 EasyStar.LEFT = 'LEFT';
 EasyStar.TOP_LEFT = 'TOP_LEFT';
+
+EasyStar.Heuristics = Heuristics;
+
+EasyStar.compressPath = compressPath;
+EasyStar.smoothenPath = smoothenPath;
+EasyStar.expandPath = expandPath;
