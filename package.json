@@ -1,63 +1,63 @@
 {
-    "name": "@kuith/easystarjs",
-    "version": "0.5.8",
-    "main": "./src/easystar.js",
-    "typings": "./index.d.ts",
-    "description": "Asynchronous A* Pathfinding API",
-    "scripts": {
-        "build:production": "rm -rf ./bin/* && webpack --env production && webpack --env production --env minify",
-        "test:production": "karma start ./karma.conf.js",
-        "benchmark": "karma start ./karma.benchmark.conf.js",
-        "dev": "webpack --development && karma start ./karma.conf.js --development",
-        "test": "npm run test:production"
-    },
-    "keywords": [
-        "A*",
-        "pathfinding",
-        "grid",
-        "easystar"
-    ],
-    "homepage": "http://www.easystarjs.com",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/prettymuchbryce/easystarjs.git"
-    },
-    "license": "MIT",
-    "author": {
-        "name": "Bryce Neal",
-        "email": "brycedneal@gmail.com",
-        "url": "http://bryce.is"
-    },
-    "devDependencies": {
-        "@babel/core": "7.23.9",
-        "@babel/preset-env": "7.23.9",
-        "@jsdevtools/coverage-istanbul-loader": "3.0.5",
-        "babel-loader": "8.3.0",
-        "eslint": "8.33.0",
-        "eslint-config-airbnb": "19.0.4",
-        "eslint-config-prettier": "8.6.0",
-        "eslint-plugin-import": "2.27.5",
-        "eslint-plugin-jsx-a11y": "6.7.1",
-        "eslint-plugin-prettier": "4.2.1",
-        "eslint-plugin-react": "7.32.2",
-        "eslint-plugin-react-hooks": "4.6.0",
-        "jasmine-core": "3.6.0",
-        "karma": "6.4.2",
-        "karma-benchmark": "1.0.4",
-        "karma-benchmarkjs-reporter": "1.0.0",
-        "karma-chrome-launcher": "3.2.0",
-        "karma-coverage-istanbul-reporter": "3.0.3",
-        "karma-jasmine": "4.0.1",
-        "karma-verbose-reporter": "0.0.6",
-        "karma-webpack": "5.0.1",
-        "prettier": "2.8.3",
-        "prettier-plugin-sorted": "2.0.0",
-        "terser-webpack-plugin": "5.3.10",
-        "uglify-js": "3.17.4",
-        "webpack": "5.90.1",
-        "webpack-cli": "5.1.4"
-    },
-    "dependencies": {
-        "heap": "0.2.6"
-    }
+  "name": "@kuith/easystarjs",
+  "version": "0.5.8",
+  "main": "./src/easystar.js",
+  "typings": "./index.d.ts",
+  "description": "Asynchronous A* Pathfinding API",
+  "scripts": {
+    "build:production": "rm -rf ./bin/* && webpack --env production && webpack --env production --env minify",
+    "test:production": "karma start ./karma.conf.js",
+    "benchmark": "karma start ./karma.benchmark.conf.js",
+    "dev": "webpack --development && karma start ./karma.conf.js --development",
+    "test": "npm run test:production"
+  },
+  "keywords": [
+    "A*",
+    "pathfinding",
+    "grid",
+    "easystar"
+  ],
+  "homepage": "http://www.easystarjs.com",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/prettymuchbryce/easystarjs.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Bryce Neal",
+    "email": "brycedneal@gmail.com",
+    "url": "http://bryce.is"
+  },
+  "devDependencies": {
+    "@babel/core": "7.23.9",
+    "@babel/preset-env": "7.23.9",
+    "@jsdevtools/coverage-istanbul-loader": "3.0.5",
+    "babel-loader": "8.3.0",
+    "eslint": "8.57.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jsx-a11y": "6.8.0",
+    "eslint-plugin-prettier": "5.1.3",
+    "eslint-plugin-react": "7.33.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "jasmine-core": "3.6.0",
+    "karma": "6.4.2",
+    "karma-benchmark": "1.0.4",
+    "karma-benchmarkjs-reporter": "1.0.0",
+    "karma-chrome-launcher": "3.2.0",
+    "karma-coverage-istanbul-reporter": "3.0.3",
+    "karma-jasmine": "4.0.1",
+    "karma-verbose-reporter": "0.0.6",
+    "karma-webpack": "5.0.1",
+    "prettier": "3.2.5",
+    "prettier-plugin-sorted": "2.0.0",
+    "terser-webpack-plugin": "5.3.10",
+    "uglify-js": "3.17.4",
+    "webpack": "5.90.1",
+    "webpack-cli": "5.1.4"
+  },
+  "dependencies": {
+    "heap": "0.2.6"
+  }
 }
