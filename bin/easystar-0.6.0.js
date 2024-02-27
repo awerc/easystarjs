@@ -26,7 +26,7 @@ var EasyStar;
 /******/(()=>{// webpackBootstrap
 /******/var __webpack_modules__={
 /***/824:
-/***/(module,__unused_webpack_exports,__webpack_require__)=>{
+/***/(module,__unused_webpack_exports,__webpack_require__)=>{function _slicedToArray(arr,i){return function(arr){if(Array.isArray(arr))return arr}
 /* eslint-disable no-param-reassign */
 /**
  *   EasyStar.js
@@ -34,8 +34,7 @@ var EasyStar;
  *   Licensed under the MIT license.
  *
  *   Implementation By Bryce Neal (@prettymuchbryce)
- * */
-var EasyStar={},Heap=__webpack_require__(416),Instance=__webpack_require__(296),Node=__webpack_require__(543),Heuristics=__webpack_require__(272),_require=__webpack_require__(528),compressPath=_require.compressPath,smoothenPath=_require.smoothenPath,expandPath=_require.expandPath,interpolate=_require.interpolate;module.exports=EasyStar;var nextInstanceId=1;EasyStar.js=function(){var collisionGrid,iterationsSoFar,acceptableTiles,DIAGONAL_COST=Math.SQRT2,syncEnabled=!1,pointsToAvoid={},costMap={},pointsToCost={},directionalConditions={},allowCornerCutting=!0,instances={},instanceQueue=[],iterationsPerCalculation=Number.MAX_VALUE,diagonalsEnabled=!1,turnPenalty=0,heuristicsFactor=1,orthogonalHeuristic=Heuristics.manhattan,diagonalHeuristic=Heuristics.octile,directionCosts=[[1,1,1],[1,0,1],[1,1,1]];
+ * */(arr)||function(r,l){var t=null==r?null:"undefined"!=typeof Symbol&&r[Symbol.iterator]||r["@@iterator"];if(null!=t){var e,n,i,u,a=[],f=!0,o=!1;try{if(i=(t=t.call(r)).next,0===l){if(Object(t)!==t)return;f=!1}else for(;!(f=(e=i.call(t)).done)&&(a.push(e.value),a.length!==l);f=!0);}catch(r){o=!0,n=r}finally{try{if(!f&&null!=t.return&&(u=t.return(),Object(u)!==u))return}finally{if(o)throw n}}return a}}(arr,i)||function(o,minLen){if(!o)return;if("string"==typeof o)return _arrayLikeToArray(o,minLen);var n=Object.prototype.toString.call(o).slice(8,-1);"Object"===n&&o.constructor&&(n=o.constructor.name);if("Map"===n||"Set"===n)return Array.from(o);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return _arrayLikeToArray(o,minLen)}(arr,i)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function _arrayLikeToArray(arr,len){(null==len||len>arr.length)&&(len=arr.length);for(var i=0,arr2=new Array(len);i<len;i++)arr2[i]=arr[i];return arr2}var EasyStar={},Heap=__webpack_require__(416),Instance=__webpack_require__(296),Node=__webpack_require__(543),Heuristics=__webpack_require__(272),_require=__webpack_require__(528),compressPath=_require.compressPath,smoothenPath=_require.smoothenPath,expandPath=_require.expandPath,interpolate=_require.interpolate;module.exports=EasyStar;var nextInstanceId=1;EasyStar.js=function(){var collisionGrid,X,Y,iterationsSoFar,acceptableTiles,DIAGONAL_COST=Math.SQRT2,syncEnabled=!1,pointsToAvoid={},costMap={},pointsToCost={},directionalConditions={},allowCornerCutting=!0,instances={},instanceQueue=[],iterationsPerCalculation=Number.MAX_VALUE,diagonalsEnabled=!1,torusEnabled=!1,turnPenalty=0,heuristicsFactor=1,orthogonalHeuristic=Heuristics.manhattan,diagonalHeuristic=Heuristics.octile,directionCosts=[[1,1,1],[1,0,1],[1,1,1]];
 /**
    * Sets the collision grid that EasyStar uses.
    *
@@ -66,14 +65,22 @@ this.enableDiagonals=function(){diagonalsEnabled=!0},
    */
 this.disableDiagonals=function(){diagonalsEnabled=!1},
 /**
+   * If enabled, map will be treated as a torus (wrapped map)
+   */
+this.enableTorus=function(){torusEnabled=!0},
+/**
+   * If enabled, map will be treated as a torus (wrapped map)
+   */
+this.disableTorus=function(){torusEnabled=!1},
+/**
    * Sets the collision grid that EasyStar uses.
    *
    * @param {Array} grid The collision grid that this EasyStar instance will read from.
    * This should be a 2D Array of Numbers.
    * */
-this.setGrid=function(grid){collisionGrid=grid;
+this.setGrid=function(grid){collisionGrid=grid,X=grid[0].length,Y=grid.length;
 // Setup cost map
-for(var y=0;y<collisionGrid.length;y++)for(var x=0;x<collisionGrid[0].length;x++)costMap[collisionGrid[y][x]]||(costMap[collisionGrid[y][x]]=1)},
+for(var y=0;y<Y;y++)for(var x=0;x<X;x++)costMap[collisionGrid[y][x]]||(costMap[collisionGrid[y][x]]=1)},
 /**
    * Sets the tile cost for a particular tile type.
    *
@@ -82,7 +89,7 @@ for(var y=0;y<collisionGrid.length;y++)for(var x=0;x<collisionGrid[0].length;x++
    * */
 this.setTileCost=function(tileType,cost){costMap[tileType]=cost},
 /**
-   * Sets the an additional cost for a particular point.
+   * Sets the additional cost for a particular point.
    * Overrides the cost from setTileCost.
    *
    * @param {Number} x The x value of the point to cost.
@@ -176,34 +183,39 @@ this.setHeuristicsFactor=function(factor){heuristicsFactor=factor},
    * */
 this.setTurnPenalty=function(penalty){turnPenalty=penalty};
 /**
+   * Wrap coordinates if torus enabled
+   * @param {Number} x
+   * @param {Number} y
+   */
+var normalizeCoords=function(x,y){return torusEnabled?[(x+X)%X,(y+Y)%Y]:[x,y]},calculateDirection=function(diffX,diffY){var testX=function(x){return[x,torusEnabled?(1-X)*x:0].includes(diffX)},testY=function(y){return[y,torusEnabled?(1-Y)*y:0].includes(diffY)};if(testX(0)&&testY(-1))return EasyStar.TOP;if(testX(1)&&testY(-1))return EasyStar.TOP_RIGHT;if(testX(1)&&testY(0))return EasyStar.RIGHT;if(testX(1)&&testY(1))return EasyStar.BOTTOM_RIGHT;if(testX(0)&&testY(1))return EasyStar.BOTTOM;if(testX(-1)&&testY(1))return EasyStar.BOTTOM_LEFT;if(testX(-1)&&testY(0))return EasyStar.LEFT;if(testX(-1)&&testY(-1))return EasyStar.TOP_LEFT;throw new Error("These differences are not valid: ".concat(diffX,", ").concat(diffY))},isTileWalkable=function(collisionGrid,acceptableTiles,x,y,sourceNode){var directionalCondition=directionalConditions[y]&&directionalConditions[y][x];if(void 0!==directionalCondition)
+// eslint-disable-next-line no-bitwise
+return(calculateDirection(sourceNode.x-x,sourceNode.y-y)&directionalCondition)>0;var _normalizeCoords2=_slicedToArray(normalizeCoords(x,y),2),nX=_normalizeCoords2[0],nY=_normalizeCoords2[1];return-1!==acceptableTiles.indexOf(collisionGrid[nY][nX])},getTileCost=function(x,y){var _normalizeCoords4=_slicedToArray(normalizeCoords(x,y),2),nX=_normalizeCoords4[0],nY=_normalizeCoords4[1];return pointsToCost[nY]&&pointsToCost[nY][nX]||costMap[collisionGrid[nY][nX]]},getDirectionCost=function(dx,dy){return directionCosts[1+dy][1+dx]},coordinateToNode=function(instance,x,y,parent,cost){if(void 0!==instance.nodeHash[y]){if(void 0!==instance.nodeHash[y][x])return instance.nodeHash[y][x]}else instance.nodeHash[y]={};var x1,y1,x2,y2,dx,dy,costSoFar,simpleDistanceToTarget=(x1=x,y1=y,x2=instance.endX,y2=instance.endY,dx=Math.abs(x1-x2),dy=Math.abs(y1-y2),
+// Torus version
+torusEnabled&&(dx=Math.min(dx,x1-x2+X,x2-x1+X),dy=Math.min(dy,y1-y2+Y,y2-y1+Y)),diagonalsEnabled?heuristicsFactor*diagonalHeuristic(dx,dy):heuristicsFactor*orthogonalHeuristic(dx,dy)),directionFromParent="NONE",turnPenaltyCost=0;null!==parent?(directionFromParent=calculateDirection(x-parent.x,y-parent.y),parent.directionFromParent!==directionFromParent&&(turnPenaltyCost=turnPenalty),costSoFar=parent.costSoFar+cost+turnPenaltyCost):costSoFar=0;var node=new Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent);return instance.nodeHash[y][x]=node,node},checkAdjacentNode=function(instance,searchNode,x,y,cost){var _normalizeCoords6=_slicedToArray(normalizeCoords(searchNode.x+x,searchNode.y+y),2),adjacentCoordinateX=_normalizeCoords6[0],adjacentCoordinateY=_normalizeCoords6[1];if((void 0===pointsToAvoid[adjacentCoordinateY]||void 0===pointsToAvoid[adjacentCoordinateY][adjacentCoordinateX])&&isTileWalkable(collisionGrid,acceptableTiles,adjacentCoordinateX,adjacentCoordinateY,searchNode)){var node=coordinateToNode(instance,adjacentCoordinateX,adjacentCoordinateY,searchNode,cost);void 0===node.list?(node.list=1,instance.openList.push(node)):searchNode.costSoFar+cost<node.costSoFar&&(node.costSoFar=searchNode.costSoFar+cost,node.parent=searchNode,instance.openList.updateItem(node))}};
+/**
    * -1, -1 | 0, -1  | 1, -1
    * -1,  0 | SOURCE | 1,  0
    * -1,  1 | 0,  1  | 1,  1
    */
-var calculateDirection=function(diffX,diffY){if(0===diffX&&-1===diffY)return EasyStar.TOP;if(1===diffX&&-1===diffY)return EasyStar.TOP_RIGHT;if(1===diffX&&0===diffY)return EasyStar.RIGHT;if(1===diffX&&1===diffY)return EasyStar.BOTTOM_RIGHT;if(0===diffX&&1===diffY)return EasyStar.BOTTOM;if(-1===diffX&&1===diffY)return EasyStar.BOTTOM_LEFT;if(-1===diffX&&0===diffY)return EasyStar.LEFT;if(-1===diffX&&-1===diffY)return EasyStar.TOP_LEFT;throw new Error("These differences are not valid: ".concat(diffX,", ").concat(diffY))},isTileWalkable=function(collisionGrid,acceptableTiles,x,y,sourceNode){var directionalCondition=directionalConditions[y]&&directionalConditions[y][x];return void 0!==directionalCondition?(calculateDirection(sourceNode.x-x,sourceNode.y-y)&directionalCondition)>0:-1!==acceptableTiles.indexOf(collisionGrid[y][x])},getTileCost=function(x,y){return pointsToCost[y]&&pointsToCost[y][x]||costMap[collisionGrid[y][x]]},getDirectionCost=function(dx,dy){return directionCosts[1+dy][1+dx]},coordinateToNode=function(instance,x,y,parent,cost){if(void 0!==instance.nodeHash[y]){if(void 0!==instance.nodeHash[y][x])return instance.nodeHash[y][x]}else instance.nodeHash[y]={};var x1,y1,x2,y2,dx,dy,costSoFar,simpleDistanceToTarget=(x1=x,y1=y,x2=instance.endX,y2=instance.endY,dx=Math.abs(x1-x2),dy=Math.abs(y1-y2),diagonalsEnabled?heuristicsFactor*diagonalHeuristic(dx,dy):heuristicsFactor*orthogonalHeuristic(dx,dy)),directionFromParent="NONE",turnPenaltyCost=0;null!==parent?(directionFromParent=calculateDirection(x-parent.x,y-parent.y),parent.directionFromParent!==directionFromParent&&(turnPenaltyCost=turnPenalty),costSoFar=parent.costSoFar+cost+turnPenaltyCost):costSoFar=0;var node=new Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent);return instance.nodeHash[y][x]=node,node},checkAdjacentNode=function(instance,searchNode,x,y,cost){var adjacentCoordinateX=searchNode.x+x,adjacentCoordinateY=searchNode.y+y;if((void 0===pointsToAvoid[adjacentCoordinateY]||void 0===pointsToAvoid[adjacentCoordinateY][adjacentCoordinateX])&&isTileWalkable(collisionGrid,acceptableTiles,adjacentCoordinateX,adjacentCoordinateY,searchNode)){var node=coordinateToNode(instance,adjacentCoordinateX,adjacentCoordinateY,searchNode,cost);void 0===node.list?(node.list=1,instance.openList.push(node)):searchNode.costSoFar+cost<node.costSoFar&&(node.costSoFar=searchNode.costSoFar+cost,node.parent=searchNode,instance.openList.updateItem(node))}};
-// Helpers
-// eslint-disable-next-line no-shadow
 /**
    * Find a path.
    *
-   * @param {Number} startX The X position of the starting point.
-   * @param {Number} startY The Y position of the starting point.
-   * @param {Number} endX The X position of the ending point.
-   * @param {Number} endY The Y position of the ending point.
+   * @param {Number} _startX The X position of the starting point.
+   * @param {Number} _startY The Y position of the starting point.
+   * @param {Number} _endX The X position of the ending point.
+   * @param {Number} _endY The Y position of the ending point.
    * @param {Function} callback A function that is called when your path
    * is found, or no path is found.
    * @return {Number} A numeric, non-zero value which identifies the created instance. This value can be passed to cancelPath to cancel the path calculation.
    *
    * */
-this.findPath=function(startX,startY,endX,endY,callback){
-// Wraps the callback for sync vs async logic
-var callbackWrapper=function(result){syncEnabled?callback(result):setTimeout((function(){callback(result)}))};
+this.findPath=function(_startX,_startY,_endX,_endY,callback){var _normalizeCoords8=_slicedToArray(normalizeCoords(_startX,_startY),2),startX=_normalizeCoords8[0],startY=_normalizeCoords8[1],_normalizeCoords10=_slicedToArray(normalizeCoords(_endX,_endY),2),endX=_normalizeCoords10[0],endY=_normalizeCoords10[1],callbackWrapper=function(result){syncEnabled?callback(result):setTimeout((function(){callback(result)}))};
 // No acceptable tiles were set
 if(void 0===acceptableTiles)throw new Error("You can't set a path without first calling setAcceptableTiles() on EasyStar.");
 // No grid was set
 if(void 0===collisionGrid)throw new Error("You can't set a path without first calling setGrid() on EasyStar.");
 // Start or endpoint outside of scope.
-if(startX<0||startY<0||endX<0||endY<0||startX>collisionGrid[0].length-1||startY>collisionGrid.length-1||endX>collisionGrid[0].length-1||endY>collisionGrid.length-1)throw new Error("Your start or end point is outside the scope of your grid.");
+if(startX<0||startY<0||endX<0||endY<0||startX>X-1||startY>Y-1||endX>X-1||endY>Y-1)throw new Error("Your start or end point is outside the scope of your grid.");
 // Start and end are the same tile.
 if(startX!==endX||startY!==endY){for(
 // End point is not an acceptable tile.
@@ -230,7 +242,7 @@ iterationsSoFar=0);var instanceId=instanceQueue[0],instance=instances[instanceId
 // Couldn't find a path.
 if(0!==instance.openList.size()){var searchNode=instance.openList.pop();
 // Handles the case where we have found the destination
-if(instance.endX!==searchNode.x||instance.endY!==searchNode.y){if(searchNode.list=0,searchNode.y>0){var directionCost=getDirectionCost(0,-1);checkAdjacentNode(instance,searchNode,0,-1,1*directionCost*getTileCost(searchNode.x,searchNode.y-1))}if(searchNode.x<collisionGrid[0].length-1){var _directionCost=getDirectionCost(1,0);checkAdjacentNode(instance,searchNode,1,0,1*_directionCost*getTileCost(searchNode.x+1,searchNode.y))}if(searchNode.y<collisionGrid.length-1){var _directionCost2=getDirectionCost(0,1);checkAdjacentNode(instance,searchNode,0,1,1*_directionCost2*getTileCost(searchNode.x,searchNode.y+1))}if(searchNode.x>0){var _directionCost3=getDirectionCost(-1,0);checkAdjacentNode(instance,searchNode,-1,0,1*_directionCost3*getTileCost(searchNode.x-1,searchNode.y))}if(diagonalsEnabled){if(searchNode.x>0&&searchNode.y>0&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost4=getDirectionCost(-1,-1);checkAdjacentNode(instance,searchNode,-1,-1,DIAGONAL_COST*_directionCost4*getTileCost(searchNode.x-1,searchNode.y-1))}if(searchNode.x<collisionGrid[0].length-1&&searchNode.y<collisionGrid.length-1&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost5=getDirectionCost(1,1);checkAdjacentNode(instance,searchNode,1,1,DIAGONAL_COST*_directionCost5*getTileCost(searchNode.x+1,searchNode.y+1))}if(searchNode.x<collisionGrid[0].length-1&&searchNode.y>0&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost6=getDirectionCost(1,-1);checkAdjacentNode(instance,searchNode,1,-1,DIAGONAL_COST*_directionCost6*getTileCost(searchNode.x+1,searchNode.y-1))}if(searchNode.x>0&&searchNode.y<collisionGrid.length-1&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost7=getDirectionCost(-1,1);checkAdjacentNode(instance,searchNode,-1,1,DIAGONAL_COST*_directionCost7*getTileCost(searchNode.x-1,searchNode.y+1))}}}else{var path=[];path.push({x:searchNode.x,y:searchNode.y});for(var parent=searchNode.parent;null!=parent;)path.push({x:parent.x,y:parent.y}),parent=parent.parent;path.reverse(),instance.callback(path),delete instances[instanceId],instanceQueue.shift()}}else instance.callback(null),delete instances[instanceId],instanceQueue.shift();else
+if(instance.endX!==searchNode.x||instance.endY!==searchNode.y){if(searchNode.list=0,searchNode.y>0||torusEnabled){var directionCost=getDirectionCost(0,-1);checkAdjacentNode(instance,searchNode,0,-1,1*directionCost*getTileCost(searchNode.x,searchNode.y-1))}if(searchNode.x<X-1||torusEnabled){var _directionCost=getDirectionCost(1,0);checkAdjacentNode(instance,searchNode,1,0,1*_directionCost*getTileCost(searchNode.x+1,searchNode.y))}if(searchNode.y<Y-1||torusEnabled){var _directionCost2=getDirectionCost(0,1);checkAdjacentNode(instance,searchNode,0,1,1*_directionCost2*getTileCost(searchNode.x,searchNode.y+1))}if(searchNode.x>0||torusEnabled){var _directionCost3=getDirectionCost(-1,0);checkAdjacentNode(instance,searchNode,-1,0,1*_directionCost3*getTileCost(searchNode.x-1,searchNode.y))}if(diagonalsEnabled){if((searchNode.x>0&&searchNode.y>0||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost4=getDirectionCost(-1,-1);checkAdjacentNode(instance,searchNode,-1,-1,DIAGONAL_COST*_directionCost4*getTileCost(searchNode.x-1,searchNode.y-1))}if((searchNode.x<X-1&&searchNode.y<Y-1||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost5=getDirectionCost(1,1);checkAdjacentNode(instance,searchNode,1,1,DIAGONAL_COST*_directionCost5*getTileCost(searchNode.x+1,searchNode.y+1))}if((searchNode.x<X-1&&searchNode.y>0||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost6=getDirectionCost(1,-1);checkAdjacentNode(instance,searchNode,1,-1,DIAGONAL_COST*_directionCost6*getTileCost(searchNode.x+1,searchNode.y-1))}if((searchNode.x>0&&searchNode.y<Y-1||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost7=getDirectionCost(-1,1);checkAdjacentNode(instance,searchNode,-1,1,DIAGONAL_COST*_directionCost7*getTileCost(searchNode.x-1,searchNode.y+1))}}}else{var path=[];path.push({x:searchNode.x,y:searchNode.y});for(var parent=searchNode.parent;null!=parent;)path.push({x:parent.x,y:parent.y}),parent=parent.parent;path.reverse(),instance.callback(path),delete instances[instanceId],instanceQueue.shift()}}else instance.callback(null),delete instances[instanceId],instanceQueue.shift();else
 // This instance was cancelled
 instanceQueue.shift()}}},EasyStar.TOP=1,EasyStar.TOP_RIGHT=2,EasyStar.RIGHT=4,EasyStar.BOTTOM_RIGHT=8,EasyStar.BOTTOM=16,EasyStar.BOTTOM_LEFT=32,EasyStar.LEFT=64,EasyStar.TOP_LEFT=128,EasyStar.Heuristics=Heuristics,EasyStar.compressPath=compressPath,EasyStar.smoothenPath=smoothenPath,EasyStar.expandPath=expandPath,EasyStar.interpolate=interpolate}
 /***/,
@@ -318,8 +330,10 @@ function(path){var coord0,coord1,interpolated,interpolatedLen,i,j,expanded=[],le
  * @param {Array<Array<number>>} grid
  * @param {Array<{x: number, y: number}>} path The path
  * @param {Array<number>} walkable Walkable ids
+ * @param {boolean} diagonalsEnabled Is diagonal movements enabled
  */
-function(grid,path,walkable){for(var newPath=_toConsumableArray(path),i=1;i<newPath.length-1;i++)for(var _newPath=newPath[i-1],x1=_newPath.x,y1=_newPath.y,_newPath$i=newPath[i],x2=_newPath$i.x,y2=_newPath$i.y,dx=x2-x1,dy=y2-y1,testCoord={x:x2+dx,y:y2+dy},j=i+2;j<newPath.length;j++){var current=newPath[j],curDx=testCoord.x-current.x,curDy=testCoord.y-current.y;if(!(testCoord.x!==current.x&&testCoord.y!==current.y&&Math.abs(curDx)!==Math.abs(curDy)||Math.sign(dx*dy)*Math.sign(curDx*curDy)==-1||0===Math.sign(dx*dy)&&0===Math.sign(curDx*curDy))){var line=interpolate(testCoord.x,testCoord.y,current.x,current.y);if(line.length===j-i&&
+// TODO enableDiagonals
+function(grid,path,walkable,diagonalsEnabled){for(var newPath=_toConsumableArray(path),i=1;i<newPath.length-1;i++)for(var _newPath=newPath[i-1],x1=_newPath.x,y1=_newPath.y,_newPath$i=newPath[i],x2=_newPath$i.x,y2=_newPath$i.y,dx=x2-x1,dy=y2-y1,testCoord={x:x2+dx,y:y2+dy},j=i+2;j<newPath.length;j++){var current=newPath[j],curDx=testCoord.x-current.x,curDy=testCoord.y-current.y;if(!(testCoord.x!==current.x&&testCoord.y!==current.y&&Math.abs(curDx)!==Math.abs(curDy)||Math.sign(dx*dy)*Math.sign(curDx*curDy)==-1||0===Math.sign(dx*dy)&&0===Math.sign(curDx*curDy))){var line=interpolate(testCoord.x,testCoord.y,current.x,current.y);if(line.length===j-i&&
 line.every((function(point){return walkable.includes(grid[point.y][point.x])}))){newPath.splice.apply(newPath,[i+1,line.length].concat(_toConsumableArray(line)));break}}}return newPath},exports.compressPath=
 /**
  * Compress a path, remove redundant nodes without altering the shape

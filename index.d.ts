@@ -56,6 +56,17 @@ export class js {
    */
   disableDiagonals(): void;
 
+
+  /**
+   * If enabled, map will be treated as a torus (wrapped map)
+   */
+  enableTorus(): void;
+
+  /**
+   * If enabled, map will be treated as a torus (wrapped map)
+   */
+  disableTorus(): void;
+
   /**
    * Sets the collision grid that EasyStar uses.
    *

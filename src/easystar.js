@@ -27,6 +27,8 @@ EasyStar.js = function js() {
   let syncEnabled = false;
   let pointsToAvoid = {};
   let collisionGrid;
+  let X; // width
+  let Y; // height
   const costMap = {};
   let pointsToCost = {};
   let directionalConditions = {};
@@ -37,6 +39,7 @@ EasyStar.js = function js() {
   let iterationsPerCalculation = Number.MAX_VALUE;
   let acceptableTiles;
   let diagonalsEnabled = false;
+  let torusEnabled = false;
   let turnPenalty = 0;
   let heuristicsFactor = 1;
   let orthogonalHeuristic = Heuristics.manhattan;
@@ -94,6 +97,20 @@ EasyStar.js = function js() {
   };
 
   /**
+   * If enabled, map will be treated as a torus (wrapped map)
+   */
+  this.enableTorus = function enableTorus() {
+    torusEnabled = true;
+  };
+
+  /**
+   * If enabled, map will be treated as a torus (wrapped map)
+   */
+  this.disableTorus = function disableTorus() {
+    torusEnabled = false;
+  };
+
+  /**
    * Sets the collision grid that EasyStar uses.
    *
    * @param {Array} grid The collision grid that this EasyStar instance will read from.
@@ -101,10 +118,12 @@ EasyStar.js = function js() {
    * */
   this.setGrid = function setGrid(grid) {
     collisionGrid = grid;
+    X = grid[0].length;
+    Y = grid.length;
 
     // Setup cost map
-    for (let y = 0; y < collisionGrid.length; y++) {
-      for (let x = 0; x < collisionGrid[0].length; x++) {
+    for (let y = 0; y < Y; y++) {
+      for (let x = 0; x < X; x++) {
         if (!costMap[collisionGrid[y][x]]) {
           costMap[collisionGrid[y][x]] = 1;
         }
@@ -123,7 +142,7 @@ EasyStar.js = function js() {
   };
 
   /**
-   * Sets the an additional cost for a particular point.
+   * Sets the additional cost for a particular point.
    * Overrides the cost from setTileCost.
    *
    * @param {Number} x The x value of the point to cost.
@@ -280,19 +299,34 @@ EasyStar.js = function js() {
   };
 
   /**
+   * Wrap coordinates if torus enabled
+   * @param {Number} x
+   * @param {Number} y
+   */
+  const normalizeCoords = function normalizeCoords(x, y) {
+    if (!torusEnabled) return [x, y];
+
+    return [(x + X) % X, (y + Y) % Y];
+  };
+
+  /**
    * -1, -1 | 0, -1  | 1, -1
    * -1,  0 | SOURCE | 1,  0
    * -1,  1 | 0,  1  | 1,  1
    */
   const calculateDirection = function calculateDirection(diffX, diffY) {
-    if (diffX === 0 && diffY === -1) return EasyStar.TOP;
-    if (diffX === 1 && diffY === -1) return EasyStar.TOP_RIGHT;
-    if (diffX === 1 && diffY === 0) return EasyStar.RIGHT;
-    if (diffX === 1 && diffY === 1) return EasyStar.BOTTOM_RIGHT;
-    if (diffX === 0 && diffY === 1) return EasyStar.BOTTOM;
-    if (diffX === -1 && diffY === 1) return EasyStar.BOTTOM_LEFT;
-    if (diffX === -1 && diffY === 0) return EasyStar.LEFT;
-    if (diffX === -1 && diffY === -1) return EasyStar.TOP_LEFT;
+    const testX = x => [x, torusEnabled ? (-X + 1) * x : 0].includes(diffX);
+    const testY = y => [y, torusEnabled ? (-Y + 1) * y : 0].includes(diffY);
+
+    if (testX(0) && testY(-1)) return EasyStar.TOP;
+    if (testX(1) && testY(-1)) return EasyStar.TOP_RIGHT;
+    if (testX(1) && testY(0)) return EasyStar.RIGHT;
+    if (testX(1) && testY(1)) return EasyStar.BOTTOM_RIGHT;
+    if (testX(0) && testY(1)) return EasyStar.BOTTOM;
+    if (testX(-1) && testY(1)) return EasyStar.BOTTOM_LEFT;
+    if (testX(-1) && testY(0)) return EasyStar.LEFT;
+    if (testX(-1) && testY(-1)) return EasyStar.TOP_LEFT;
+
     throw new Error(`These differences are not valid: ${diffX}, ${diffY}`);
   };
 
@@ -306,11 +340,13 @@ EasyStar.js = function js() {
       return (direction & directionalCondition) > 0;
     }
 
-    return acceptableTiles.indexOf(collisionGrid[y][x]) !== -1;
+    const [nX, nY] = normalizeCoords(x, y);
+    return acceptableTiles.indexOf(collisionGrid[nY][nX]) !== -1;
   };
 
   const getTileCost = function getTileCost(x, y) {
-    return (pointsToCost[y] && pointsToCost[y][x]) || costMap[collisionGrid[y][x]];
+    const [nX, nY] = normalizeCoords(x, y);
+    return (pointsToCost[nY] && pointsToCost[nY][nX]) || costMap[collisionGrid[nY][nX]];
   };
 
   const getDirectionCost = function getDirectionCost(dx, dy) {
@@ -318,8 +354,16 @@ EasyStar.js = function js() {
   };
 
   const getDistance = function getDistance(x1, y1, x2, y2) {
-    const dx = Math.abs(x1 - x2);
-    const dy = Math.abs(y1 - y2);
+    // Classic version
+    let dx = Math.abs(x1 - x2);
+    let dy = Math.abs(y1 - y2);
+
+    // Torus version
+    if (torusEnabled) {
+      dx = Math.min(dx, x1 - x2 + X, x2 - x1 + X);
+      dy = Math.min(dy, y1 - y2 + Y, y2 - y1 + Y);
+    }
+
     if (diagonalsEnabled) {
       // Octile distance
       return heuristicsFactor * diagonalHeuristic(dx, dy);
@@ -356,8 +400,7 @@ EasyStar.js = function js() {
 
   // Private methods follow
   const checkAdjacentNode = function checkAdjacentNode(instance, searchNode, x, y, cost) {
-    const adjacentCoordinateX = searchNode.x + x;
-    const adjacentCoordinateY = searchNode.y + y;
+    const [adjacentCoordinateX, adjacentCoordinateY] = normalizeCoords(searchNode.x + x, searchNode.y + y);
 
     if (
       (pointsToAvoid[adjacentCoordinateY] === undefined ||
@@ -380,16 +423,19 @@ EasyStar.js = function js() {
   /**
    * Find a path.
    *
-   * @param {Number} startX The X position of the starting point.
-   * @param {Number} startY The Y position of the starting point.
-   * @param {Number} endX The X position of the ending point.
-   * @param {Number} endY The Y position of the ending point.
+   * @param {Number} _startX The X position of the starting point.
+   * @param {Number} _startY The Y position of the starting point.
+   * @param {Number} _endX The X position of the ending point.
+   * @param {Number} _endY The Y position of the ending point.
    * @param {Function} callback A function that is called when your path
    * is found, or no path is found.
    * @return {Number} A numeric, non-zero value which identifies the created instance. This value can be passed to cancelPath to cancel the path calculation.
    *
    * */
-  this.findPath = function findPath(startX, startY, endX, endY, callback) {
+  this.findPath = function findPath(_startX, _startY, _endX, _endY, callback) {
+    const [startX, startY] = normalizeCoords(_startX, _startY);
+    const [endX, endY] = normalizeCoords(_endX, _endY);
+
     // Wraps the callback for sync vs async logic
     const callbackWrapper = function callbackWrapper(result) {
       if (syncEnabled) {
@@ -416,10 +462,10 @@ EasyStar.js = function js() {
       startY < 0 ||
       endX < 0 ||
       endY < 0 ||
-      startX > collisionGrid[0].length - 1 ||
-      startY > collisionGrid.length - 1 ||
-      endX > collisionGrid[0].length - 1 ||
-      endY > collisionGrid.length - 1
+      startX > X - 1 ||
+      startY > Y - 1 ||
+      endX > X - 1 ||
+      endY > Y - 1
     ) {
       throw new Error('Your start or end point is outside the scope of your grid.');
     }
@@ -538,7 +584,7 @@ EasyStar.js = function js() {
 
       searchNode.list = CLOSED_LIST;
 
-      if (searchNode.y > 0) {
+      if (searchNode.y > 0 || torusEnabled) {
         const directionCost = getDirectionCost(0, -1);
         checkAdjacentNode(
           instance,
@@ -548,7 +594,7 @@ EasyStar.js = function js() {
           STRAIGHT_COST * directionCost * getTileCost(searchNode.x, searchNode.y - 1),
         );
       }
-      if (searchNode.x < collisionGrid[0].length - 1) {
+      if (searchNode.x < X - 1 || torusEnabled) {
         const directionCost = getDirectionCost(1, 0);
         checkAdjacentNode(
           instance,
@@ -558,7 +604,7 @@ EasyStar.js = function js() {
           STRAIGHT_COST * directionCost * getTileCost(searchNode.x + 1, searchNode.y),
         );
       }
-      if (searchNode.y < collisionGrid.length - 1) {
+      if (searchNode.y < Y - 1 || torusEnabled) {
         const directionCost = getDirectionCost(0, 1);
         checkAdjacentNode(
           instance,
@@ -568,7 +614,7 @@ EasyStar.js = function js() {
           STRAIGHT_COST * directionCost * getTileCost(searchNode.x, searchNode.y + 1),
         );
       }
-      if (searchNode.x > 0) {
+      if (searchNode.x > 0 || torusEnabled) {
         const directionCost = getDirectionCost(-1, 0);
         checkAdjacentNode(
           instance,
@@ -579,7 +625,7 @@ EasyStar.js = function js() {
         );
       }
       if (diagonalsEnabled) {
-        if (searchNode.x > 0 && searchNode.y > 0) {
+        if ((searchNode.x > 0 && searchNode.y > 0) || torusEnabled) {
           if (
             allowCornerCutting ||
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y - 1, searchNode) &&
@@ -595,7 +641,7 @@ EasyStar.js = function js() {
             );
           }
         }
-        if (searchNode.x < collisionGrid[0].length - 1 && searchNode.y < collisionGrid.length - 1) {
+        if ((searchNode.x < X - 1 && searchNode.y < Y - 1) || torusEnabled) {
           if (
             allowCornerCutting ||
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y + 1, searchNode) &&
@@ -611,7 +657,7 @@ EasyStar.js = function js() {
             );
           }
         }
-        if (searchNode.x < collisionGrid[0].length - 1 && searchNode.y > 0) {
+        if ((searchNode.x < X - 1 && searchNode.y > 0) || torusEnabled) {
           if (
             allowCornerCutting ||
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y - 1, searchNode) &&
@@ -627,7 +673,7 @@ EasyStar.js = function js() {
             );
           }
         }
-        if (searchNode.x > 0 && searchNode.y < collisionGrid.length - 1) {
+        if ((searchNode.x > 0 && searchNode.y < Y - 1) || torusEnabled) {
           if (
             allowCornerCutting ||
             (isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y + 1, searchNode) &&
