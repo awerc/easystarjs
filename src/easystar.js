@@ -299,14 +299,23 @@ EasyStar.js = function js() {
   };
 
   /**
-   * Wrap coordinates if torus enabled
+   * Wrap x coordinate if torus enabled
    * @param {Number} x
+   */
+  const normalizeX = function normalizeX(x) {
+    if (torusEnabled) return (x + X) % X;
+
+    return x;
+  };
+
+  /**
+   * Wrap y coordinate if torus enabled
    * @param {Number} y
    */
-  const normalizeCoords = function normalizeCoords(x, y) {
-    if (!torusEnabled) return [x, y];
+  const normalizeY = function normalizeY(y) {
+    if (torusEnabled) return (y + Y) % Y;
 
-    return [(x + X) % X, (y + Y) % Y];
+    return y;
   };
 
   /**
@@ -341,12 +350,14 @@ EasyStar.js = function js() {
       return (direction & directionalCondition) > 0;
     }
 
-    const [nX, nY] = normalizeCoords(x, y);
+    const nX = normalizeX(x);
+    const nY = normalizeY(y);
     return acceptableTiles.indexOf(collisionGrid[nY][nX]) !== -1;
   };
 
   const getTileCost = function getTileCost(x, y) {
-    const [nX, nY] = normalizeCoords(x, y);
+    const nX = normalizeX(x);
+    const nY = normalizeY(y);
     return (pointsToCost[nY] && pointsToCost[nY][nX]) || costMap[collisionGrid[nY][nX]];
   };
 
@@ -401,7 +412,8 @@ EasyStar.js = function js() {
 
   // Private methods follow
   const checkAdjacentNode = function checkAdjacentNode(instance, searchNode, x, y, cost) {
-    const [adjacentCoordinateX, adjacentCoordinateY] = normalizeCoords(searchNode.x + x, searchNode.y + y);
+    const adjacentCoordinateX = normalizeX(searchNode.x + x);
+    const adjacentCoordinateY = normalizeY(searchNode.y + y);
 
     if (
       (pointsToAvoid[adjacentCoordinateY] === undefined ||
@@ -434,8 +446,10 @@ EasyStar.js = function js() {
    *
    * */
   this.findPath = function findPath(_startX, _startY, _endX, _endY, callback) {
-    const [startX, startY] = normalizeCoords(_startX, _startY);
-    const [endX, endY] = normalizeCoords(_endX, _endY);
+    const startX = normalizeX(_startX);
+    const startY = normalizeY(_startY);
+    const endX = normalizeX(_endX);
+    const endY = normalizeY(_endY);
 
     // Wraps the callback for sync vs async logic
     const callbackWrapper = function callbackWrapper(result) {
