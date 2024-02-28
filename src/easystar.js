@@ -315,8 +315,9 @@ EasyStar.js = function js() {
    * -1,  1 | 0,  1  | 1,  1
    */
   const calculateDirection = function calculateDirection(diffX, diffY) {
-    const testX = x => [x, torusEnabled ? (-X + 1) * x : 0].includes(diffX);
-    const testY = y => [y, torusEnabled ? (-Y + 1) * y : 0].includes(diffY);
+    const test = (coord, limit, diff) => coord === diff || (torusEnabled && (-limit + 1) * coord === diff);
+    const testX = x => test(x, X, diffX);
+    const testY = y => test(y, Y, diffY);
 
     if (testX(0) && testY(-1)) return EasyStar.TOP;
     if (testX(1) && testY(-1)) return EasyStar.TOP_RIGHT;
