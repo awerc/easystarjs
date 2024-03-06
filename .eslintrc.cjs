@@ -10,13 +10,13 @@ module.exports = {
   plugins: ['import'],
 
   extends: [
-    //
-    'airbnb',
+    'airbnb', //
     'prettier',
     'plugin:prettier/recommended',
   ],
 
   rules: {
+    'new-cap': 'off',
     'no-plusplus': 'off',
     'no-continue': 'off',
     'no-console': 'off',
@@ -31,4 +31,15 @@ module.exports = {
     'import/no-default-export': 'off',
     'import/prefer-default-export': 'off',
   },
+
+  overrides: [
+    {
+      files: 'test/**/*',
+      env: {
+        mocha: true,
+        jasmine: true,
+        jest: true,
+      },
+    },
+  ],
 };

@@ -1,6 +1,6 @@
 {
   "name": "@kuith/easystarjs",
-  "version": "0.6.2",
+  "version": "1.0.0",
   "main": "./src/easystar.js",
   "typings": "./index.d.ts",
   "description": "Asynchronous A* Pathfinding API",
@@ -9,7 +9,8 @@
     "test:production": "karma start ./karma.conf.js",
     "benchmark": "karma start ./karma.benchmark.conf.js",
     "dev": "webpack --development && karma start ./karma.conf.js --development",
-    "test": "npm run test:production"
+    "test": "npm run test:production",
+    "release": "yarn build:production && npm publish"
   },
   "keywords": [
     "A*",
@@ -17,16 +18,9 @@
     "grid",
     "easystar"
   ],
-  "homepage": "http://www.easystarjs.com",
   "repository": {
     "type": "git",
-    "url": "git://github.com/prettymuchbryce/easystarjs.git"
-  },
-  "license": "MIT",
-  "author": {
-    "name": "Bryce Neal",
-    "email": "brycedneal@gmail.com",
-    "url": "http://bryce.is"
+    "url": "git://github.com/awerc/easystarjs.git"
   },
   "devDependencies": {
     "@babel/core": "7.23.9",

@@ -1,18 +1,11 @@
 const path = require('path');
-const fs = require('fs');
 const TerserPlugin = require('terser-webpack-plugin');
-const webpack = require('webpack');
 const config = require('./package.json');
 
 module.exports = env => {
   const isProductionBuild = env.production;
   const isBuildMinified = env.minify;
   const filename = `easystar-${config.version}${isBuildMinified ? '.min' : ''}.js`;
-
-  const getLicense = () => {
-    const licenseText = fs.readFileSync(path.resolve(__dirname, 'LICENSE'), 'utf8');
-    return `@license\n${licenseText}`;
-  };
 
   const terserSettings = {
     terserOptions: {
@@ -79,10 +72,5 @@ module.exports = env => {
         },
       ],
     },
-    plugins: [
-      new webpack.BannerPlugin({
-        banner: getLicense(),
-      }),
-    ],
   };
 };

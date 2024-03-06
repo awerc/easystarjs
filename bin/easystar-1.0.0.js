@@ -1,41 +1,10 @@
-/*!
- * @license
- * The MIT License (MIT)
- *
- * Copyright (c) 2012-2020 Bryce Neal
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 var EasyStar;
 /******/(()=>{// webpackBootstrap
 /******/var __webpack_modules__={
 /***/824:
 /***/(module,__unused_webpack_exports,__webpack_require__)=>{
 /* eslint-disable no-param-reassign */
-/**
- *   EasyStar.js
- *   github.com/prettymuchbryce/EasyStarJS
- *   Licensed under the MIT license.
- *
- *   Implementation By Bryce Neal (@prettymuchbryce)
- * */
-var EasyStar={},Heap=__webpack_require__(416),Instance=__webpack_require__(296),Node=__webpack_require__(543),Heuristics=__webpack_require__(272),_require=__webpack_require__(528),compressPath=_require.compressPath,smoothenPath=_require.smoothenPath,expandPath=_require.expandPath,interpolate=_require.interpolate;module.exports=EasyStar;var nextInstanceId=1;EasyStar.js=function(){var collisionGrid,X,Y,iterationsSoFar,acceptableTiles,DIAGONAL_COST=Math.SQRT2,syncEnabled=!1,pointsToAvoid={},costMap={},pointsToCost={},directionalConditions={},allowCornerCutting=!0,instances={},instanceQueue=[],iterationsPerCalculation=Number.MAX_VALUE,diagonalsEnabled=!1,torusEnabled=!1,turnPenalty=0,heuristicsFactor=1,orthogonalHeuristic=Heuristics.manhattan,diagonalHeuristic=Heuristics.octile,directionCosts=[[1,1,1],[1,0,1],[1,1,1]];
+var Heap=__webpack_require__(416),Instance=__webpack_require__(296),Node=__webpack_require__(543),Heuristics=__webpack_require__(272),_require=__webpack_require__(528),calculateDirection=_require.calculateDirection,STOP=_require.STOP,TOP=_require.TOP,TOP_RIGHT=_require.TOP_RIGHT,RIGHT=_require.RIGHT,BOTTOM_RIGHT=_require.BOTTOM_RIGHT,BOTTOM=_require.BOTTOM,BOTTOM_LEFT=_require.BOTTOM_LEFT,LEFT=_require.LEFT,TOP_LEFT=_require.TOP_LEFT,compressPath=_require.compressPath,smoothenPath=_require.smoothenPath,expandPath=_require.expandPath,interpolate=_require.interpolate,nextInstanceId=1;module.exports={EasyStar:function(){var collisionGrid,X,Y,iterationsSoFar,acceptableTiles,DIAGONAL_COST=Math.SQRT2,syncEnabled=!1,pointsToAvoid={},costMap={},pointsToCost={},directionalConditions={},allowCornerCutting=!0,instances={},instanceQueue=[],iterationsPerCalculation=Number.MAX_VALUE,diagonalsEnabled=!1,torusEnabled=!1,turnPenalty=0,heuristicsFactor=1,orthogonalHeuristic=Heuristics.manhattan,diagonalHeuristic=Heuristics.octile,directionCosts=[[1,1,1],[1,0,1],[1,1,1]];
 /**
    * Sets the collision grid that EasyStar uses.
    *
@@ -187,11 +156,11 @@ this.setTurnPenalty=function(penalty){turnPenalty=penalty};
    * Wrap x coordinate if torus enabled
    * @param {Number} x
    */
-var normalizeX=function(x){return torusEnabled?(x+X)%X:x},normalizeY=function(y){return torusEnabled?(y+Y)%Y:y},calculateDirection=function(diffX,diffY){var test=function(coord,limit,diff){return coord===diff||torusEnabled&&(1-limit)*coord===diff},testX=function(x){return test(x,X,diffX)},testY=function(y){return test(y,Y,diffY)};if(testX(0)&&testY(-1))return EasyStar.TOP;if(testX(1)&&testY(-1))return EasyStar.TOP_RIGHT;if(testX(1)&&testY(0))return EasyStar.RIGHT;if(testX(1)&&testY(1))return EasyStar.BOTTOM_RIGHT;if(testX(0)&&testY(1))return EasyStar.BOTTOM;if(testX(-1)&&testY(1))return EasyStar.BOTTOM_LEFT;if(testX(-1)&&testY(0))return EasyStar.LEFT;if(testX(-1)&&testY(-1))return EasyStar.TOP_LEFT;throw new Error("These differences are not valid: ".concat(diffX,", ").concat(diffY))},isTileWalkable=function(collisionGrid,acceptableTiles,x,y,sourceNode){var directionalCondition=directionalConditions[y]&&directionalConditions[y][x];if(void 0!==directionalCondition)
+var normalizeX=function(x){return torusEnabled?(x+X)%X:x},normalizeY=function(y){return torusEnabled?(y+Y)%Y:y},isTileWalkable=function(collisionGrid,acceptableTiles,x,y,sourceNode){var directionalCondition=directionalConditions[y]&&directionalConditions[y][x];if(void 0!==directionalCondition)
 // eslint-disable-next-line no-bitwise
-return(calculateDirection(sourceNode.x-x,sourceNode.y-y)&directionalCondition)>0;var nX=normalizeX(x),nY=normalizeY(y);return-1!==acceptableTiles.indexOf(collisionGrid[nY][nX])},getTileCost=function(x,y){var nX=normalizeX(x),nY=normalizeY(y);return pointsToCost[nY]&&pointsToCost[nY][nX]||costMap[collisionGrid[nY][nX]]},getDirectionCost=function(dx,dy){return directionCosts[1+dy][1+dx]},coordinateToNode=function(instance,x,y,parent,cost){if(void 0!==instance.nodeHash[y]){if(void 0!==instance.nodeHash[y][x])return instance.nodeHash[y][x]}else instance.nodeHash[y]={};var x1,y1,x2,y2,dx,dy,costSoFar,simpleDistanceToTarget=(x1=x,y1=y,x2=instance.endX,y2=instance.endY,dx=Math.abs(x1-x2),dy=Math.abs(y1-y2),
+return(calculateDirection(X,Y,sourceNode.x-x,sourceNode.y-y,torusEnabled)&directionalCondition)>0;var nX=normalizeX(x),nY=normalizeY(y);return-1!==acceptableTiles.indexOf(collisionGrid[nY][nX])},getTileCost=function(x,y){var nX=normalizeX(x),nY=normalizeY(y);return pointsToCost[nY]&&pointsToCost[nY][nX]||costMap[collisionGrid[nY][nX]]},getDirectionCost=function(dx,dy){return directionCosts[1+dy][1+dx]},coordinateToNode=function(instance,x,y,parent,cost){if(void 0!==instance.nodeHash[y]){if(void 0!==instance.nodeHash[y][x])return instance.nodeHash[y][x]}else instance.nodeHash[y]={};var x1,y1,x2,y2,dx,dy,costSoFar,simpleDistanceToTarget=(x1=x,y1=y,x2=instance.endX,y2=instance.endY,dx=Math.abs(x1-x2),dy=Math.abs(y1-y2),
 // Torus version
-torusEnabled&&(dx=Math.min(dx,x1-x2+X,x2-x1+X),dy=Math.min(dy,y1-y2+Y,y2-y1+Y)),diagonalsEnabled?heuristicsFactor*diagonalHeuristic(dx,dy):heuristicsFactor*orthogonalHeuristic(dx,dy)),directionFromParent="NONE",turnPenaltyCost=0;null!==parent?(directionFromParent=calculateDirection(x-parent.x,y-parent.y),parent.directionFromParent!==directionFromParent&&(turnPenaltyCost=turnPenalty),costSoFar=parent.costSoFar+cost+turnPenaltyCost):costSoFar=0;var node=new Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent);return instance.nodeHash[y][x]=node,node},checkAdjacentNode=function(instance,searchNode,x,y,cost){var adjacentCoordinateX=normalizeX(searchNode.x+x),adjacentCoordinateY=normalizeY(searchNode.y+y);if((void 0===pointsToAvoid[adjacentCoordinateY]||void 0===pointsToAvoid[adjacentCoordinateY][adjacentCoordinateX])&&isTileWalkable(collisionGrid,acceptableTiles,adjacentCoordinateX,adjacentCoordinateY,searchNode)){var node=coordinateToNode(instance,adjacentCoordinateX,adjacentCoordinateY,searchNode,cost);void 0===node.list?(node.list=1,instance.openList.push(node)):searchNode.costSoFar+cost<node.costSoFar&&(node.costSoFar=searchNode.costSoFar+cost,node.parent=searchNode,instance.openList.updateItem(node))}};
+torusEnabled&&(dx=Math.min(dx,x1-x2+X,x2-x1+X),dy=Math.min(dy,y1-y2+Y,y2-y1+Y)),diagonalsEnabled?heuristicsFactor*diagonalHeuristic(dx,dy):heuristicsFactor*orthogonalHeuristic(dx,dy)),directionFromParent=STOP,turnPenaltyCost=0;null!==parent?(directionFromParent=calculateDirection(X,Y,x-parent.x,y-parent.y,torusEnabled),parent.directionFromParent!==directionFromParent&&(turnPenaltyCost=turnPenalty),costSoFar=parent.costSoFar+cost+turnPenaltyCost):costSoFar=0;var node=new Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent);return instance.nodeHash[y][x]=node,node},checkAdjacentNode=function(instance,searchNode,x,y,cost){var adjacentCoordinateX=normalizeX(searchNode.x+x),adjacentCoordinateY=normalizeY(searchNode.y+y);if((void 0===pointsToAvoid[adjacentCoordinateY]||void 0===pointsToAvoid[adjacentCoordinateY][adjacentCoordinateX])&&isTileWalkable(collisionGrid,acceptableTiles,adjacentCoordinateX,adjacentCoordinateY,searchNode)){var node=coordinateToNode(instance,adjacentCoordinateX,adjacentCoordinateY,searchNode,cost);void 0===node.list?(node.list=1,instance.openList.push(node)):searchNode.costSoFar+cost<node.costSoFar&&(node.costSoFar=searchNode.costSoFar+cost,node.parent=searchNode,instance.openList.updateItem(node))}};
 /**
    * Wrap y coordinate if torus enabled
    * @param {Number} y
@@ -243,7 +212,7 @@ if(0!==instance.openList.size()){var searchNode=instance.openList.pop();
 // Handles the case where we have found the destination
 if(instance.endX!==searchNode.x||instance.endY!==searchNode.y){if(searchNode.list=0,searchNode.y>0||torusEnabled){var directionCost=getDirectionCost(0,-1);checkAdjacentNode(instance,searchNode,0,-1,1*directionCost*getTileCost(searchNode.x,searchNode.y-1))}if(searchNode.x<X-1||torusEnabled){var _directionCost=getDirectionCost(1,0);checkAdjacentNode(instance,searchNode,1,0,1*_directionCost*getTileCost(searchNode.x+1,searchNode.y))}if(searchNode.y<Y-1||torusEnabled){var _directionCost2=getDirectionCost(0,1);checkAdjacentNode(instance,searchNode,0,1,1*_directionCost2*getTileCost(searchNode.x,searchNode.y+1))}if(searchNode.x>0||torusEnabled){var _directionCost3=getDirectionCost(-1,0);checkAdjacentNode(instance,searchNode,-1,0,1*_directionCost3*getTileCost(searchNode.x-1,searchNode.y))}if(diagonalsEnabled){if((searchNode.x>0&&searchNode.y>0||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost4=getDirectionCost(-1,-1);checkAdjacentNode(instance,searchNode,-1,-1,DIAGONAL_COST*_directionCost4*getTileCost(searchNode.x-1,searchNode.y-1))}if((searchNode.x<X-1&&searchNode.y<Y-1||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost5=getDirectionCost(1,1);checkAdjacentNode(instance,searchNode,1,1,DIAGONAL_COST*_directionCost5*getTileCost(searchNode.x+1,searchNode.y+1))}if((searchNode.x<X-1&&searchNode.y>0||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y-1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x+1,searchNode.y,searchNode))){var _directionCost6=getDirectionCost(1,-1);checkAdjacentNode(instance,searchNode,1,-1,DIAGONAL_COST*_directionCost6*getTileCost(searchNode.x+1,searchNode.y-1))}if((searchNode.x>0&&searchNode.y<Y-1||torusEnabled)&&(allowCornerCutting||isTileWalkable(collisionGrid,acceptableTiles,searchNode.x,searchNode.y+1,searchNode)&&isTileWalkable(collisionGrid,acceptableTiles,searchNode.x-1,searchNode.y,searchNode))){var _directionCost7=getDirectionCost(-1,1);checkAdjacentNode(instance,searchNode,-1,1,DIAGONAL_COST*_directionCost7*getTileCost(searchNode.x-1,searchNode.y+1))}}}else{var path=[];path.push({x:searchNode.x,y:searchNode.y});for(var parent=searchNode.parent;null!=parent;)path.push({x:parent.x,y:parent.y}),parent=parent.parent;path.reverse(),instance.callback(path),delete instances[instanceId],instanceQueue.shift()}}else instance.callback(null),delete instances[instanceId],instanceQueue.shift();else
 // This instance was cancelled
-instanceQueue.shift()}}},EasyStar.TOP=1,EasyStar.TOP_RIGHT=2,EasyStar.RIGHT=4,EasyStar.BOTTOM_RIGHT=8,EasyStar.BOTTOM=16,EasyStar.BOTTOM_LEFT=32,EasyStar.LEFT=64,EasyStar.TOP_LEFT=128,EasyStar.Heuristics=Heuristics,EasyStar.compressPath=compressPath,EasyStar.smoothenPath=smoothenPath,EasyStar.expandPath=expandPath,EasyStar.interpolate=interpolate}
+instanceQueue.shift()}}},TOP,TOP_RIGHT,RIGHT,BOTTOM_RIGHT,BOTTOM,BOTTOM_LEFT,LEFT,TOP_LEFT,Heuristics,calculateDirection,compressPath,smoothenPath,expandPath,interpolate}}
 /***/,
 /***/272:
 /***/module=>{
@@ -305,7 +274,7 @@ function Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent){t
  * */Node.prototype.bestGuessDistance=function(){return this.costSoFar+this.simpleDistanceToTarget},module.exports=Node}
 /***/,
 /***/528:
-/***/(__unused_webpack_module,exports)=>{function _toConsumableArray(arr){return function(arr){if(Array.isArray(arr))return _arrayLikeToArray(arr)}(arr)||function(iter){if("undefined"!=typeof Symbol&&null!=iter[Symbol.iterator]||null!=iter["@@iterator"])return Array.from(iter)}(arr)||function(o,minLen){if(!o)return;if("string"==typeof o)return _arrayLikeToArray(o,minLen);var n=Object.prototype.toString.call(o).slice(8,-1);"Object"===n&&o.constructor&&(n=o.constructor.name);if("Map"===n||"Set"===n)return Array.from(o);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return _arrayLikeToArray(o,minLen)}(arr)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function _arrayLikeToArray(arr,len){(null==len||len>arr.length)&&(len=arr.length);for(var i=0,arr2=new Array(len);i<len;i++)arr2[i]=arr[i];return arr2}
+/***/module=>{function _toConsumableArray(arr){return function(arr){if(Array.isArray(arr))return _arrayLikeToArray(arr)}(arr)||function(iter){if("undefined"!=typeof Symbol&&null!=iter[Symbol.iterator]||null!=iter["@@iterator"])return Array.from(iter)}(arr)||function(o,minLen){if(!o)return;if("string"==typeof o)return _arrayLikeToArray(o,minLen);var n=Object.prototype.toString.call(o).slice(8,-1);"Object"===n&&o.constructor&&(n=o.constructor.name);if("Map"===n||"Set"===n)return Array.from(o);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return _arrayLikeToArray(o,minLen)}(arr)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function _arrayLikeToArray(arr,len){(null==len||len>arr.length)&&(len=arr.length);for(var i=0,arr2=new Array(len);i<len;i++)arr2[i]=arr[i];return arr2}
 /**
  * Given the start and end coordinates, return all the coordinates lying
  * on the line formed by these coordinates, based on Bresenham's algorithm.
@@ -315,14 +284,26 @@ function Node(parent,x,y,costSoFar,simpleDistanceToTarget,directionFromParent){t
  * @param {number} x1 End x coordinate
  * @param {number} y1 End y coordinate
  * @return {Array<{x: number, y: number}>} The coordinates on the line
- */function interpolate(x0,y0,x1,y1){var err,e2,x=x0,y=y0,abs=Math.abs,line=[],dx=abs(x1-x),dy=abs(y1-y),sx=x<x1?1:-1,sy=y<y1?1:-1;for(err=dx-dy;line.push({x,y}),x!==x1||y!==y1;)(e2=2*err)>-dy&&(err-=dy,x+=sx),e2<dx&&(err+=dx,y+=sy);return line}exports.interpolate=interpolate,exports.expandPath=
+ */
+function interpolate(x0,y0,x1,y1){var err,e2,x=x0,y=y0,abs=Math.abs,line=[],dx=abs(x1-x),dy=abs(y1-y),sx=x<x1?1:-1,sy=y<y1?1:-1;for(err=dx-dy;line.push({x,y}),x!==x1||y!==y1;)(e2=2*err)>-dy&&(err-=dy,x+=sx),e2<dx&&(err+=dx,y+=sy);return line}
 /**
  * Given a compressed path, return a new path that has all the segments
  * in it interpolated.
  * @param {Array<{x: number, y: number}>} path The path
  * @return {Array<{x: number, y: number}>}>} expanded path
+ */module.exports={STOP:0,TOP:1,TOP_RIGHT:2,RIGHT:4,BOTTOM_RIGHT:8,BOTTOM:16,BOTTOM_LEFT:32,LEFT:64,TOP_LEFT:128,calculateDirection:
+/**
+ * -1, -1 | 0, -1  | 1, -1
+ * -1,  0 | SOURCE | 1,  0
+ * -1,  1 | 0,  1  | 1,  1
+ @param {number} X width of map
+ @param {number} Y heogth of map
+ @param {number} deltaX diff on x-axis
+ @param {number} deltaY diff on y-axis
+ @param {boolean} torusEnabled if enabled, map will be treated as a torus (wrapped map)
+ @return {number} Direction
  */
-function(path){var coord0,coord1,interpolated,interpolatedLen,i,j,expanded=[],len=path.length;if(len<2)return expanded;for(i=0;i<len-1;++i)for(coord0=path[i],coord1=path[i+1],interpolatedLen=(interpolated=interpolate(coord0.x,coord0.y,coord1.x,coord1.y)).length,j=0;j<interpolatedLen-1;++j)expanded.push(interpolated[j]);return expanded.push(path[len-1]),expanded},exports.smoothenPath=
+function(X,Y,deltaX,deltaY,torusEnabled){var test=function(coord,limit,diff){return coord===diff||torusEnabled&&(1-limit)*coord===diff},testX=function(x){return test(x,X,deltaX)},testY=function(y){return test(y,Y,deltaY)};return testX(0)&&testY(-1)?1:testX(1)&&testY(-1)?2:testX(1)&&testY(0)?4:testX(1)&&testY(1)?8:testX(0)&&testY(1)?16:testX(-1)&&testY(1)?32:testX(-1)&&testY(0)?64:testX(-1)&&testY(-1)?128:0===deltaX&&0===deltaY?0:0===deltaX?deltaY>0?16:1:0===deltaY?deltaX>0?4:64:deltaY>0?deltaX>0?8:32:deltaX>0?2:128},interpolate,expandPath:function(path){var coord0,coord1,interpolated,interpolatedLen,i,j,expanded=[],len=path.length;if(len<2)return expanded;for(i=0;i<len-1;++i)for(coord0=path[i],coord1=path[i+1],interpolatedLen=(interpolated=interpolate(coord0.x,coord0.y,coord1.x,coord1.y)).length,j=0;j<interpolatedLen-1;++j)expanded.push(interpolated[j]);return expanded.push(path[len-1]),expanded}
 /**
  * Smoothen the give path.
  * The original path will not be modified; a new path will be returned.
@@ -332,15 +313,14 @@ function(path){var coord0,coord1,interpolated,interpolatedLen,i,j,expanded=[],le
  * @param {boolean} diagonalsEnabled Is diagonal movements enabled
  */
 // TODO enableDiagonals
-function(grid,path,walkable,diagonalsEnabled){for(var newPath=_toConsumableArray(path),i=1;i<newPath.length-1;i++)for(var _newPath=newPath[i-1],x1=_newPath.x,y1=_newPath.y,_newPath$i=newPath[i],x2=_newPath$i.x,y2=_newPath$i.y,dx=x2-x1,dy=y2-y1,testCoord={x:x2+dx,y:y2+dy},j=i+2;j<newPath.length;j++){var current=newPath[j],curDx=testCoord.x-current.x,curDy=testCoord.y-current.y;if(!(testCoord.x!==current.x&&testCoord.y!==current.y&&Math.abs(curDx)!==Math.abs(curDy)||Math.sign(dx*dy)*Math.sign(curDx*curDy)==-1||0===Math.sign(dx*dy)&&0===Math.sign(curDx*curDy))){var line=interpolate(testCoord.x,testCoord.y,current.x,current.y);if(line.length===j-i&&
-line.every((function(point){return walkable.includes(grid[point.y][point.x])}))){newPath.splice.apply(newPath,[i+1,line.length].concat(_toConsumableArray(line)));break}}}return newPath},exports.compressPath=
+,smoothenPath:function(grid,path,walkable,diagonalsEnabled){for(var newPath=_toConsumableArray(path),i=1;i<newPath.length-1;i++)for(var _newPath=newPath[i-1],x1=_newPath.x,y1=_newPath.y,_newPath$i=newPath[i],x2=_newPath$i.x,y2=_newPath$i.y,dx=x2-x1,dy=y2-y1,testCoord={x:x2+dx,y:y2+dy},j=i+2;j<newPath.length;j++){var current=newPath[j],curDx=testCoord.x-current.x,curDy=testCoord.y-current.y;if(!(testCoord.x!==current.x&&testCoord.y!==current.y&&Math.abs(curDx)!==Math.abs(curDy)||Math.sign(dx*dy)*Math.sign(curDx*curDy)==-1||0===Math.sign(dx*dy)&&0===Math.sign(curDx*curDy))){var line=interpolate(testCoord.x,testCoord.y,current.x,current.y);if(line.length===j-i&&
+line.every((function(point){return walkable.includes(grid[point.y][point.x])}))){newPath.splice.apply(newPath,[i+1,line.length].concat(_toConsumableArray(line)));break}}}return newPath}
 /**
  * Compress a path, remove redundant nodes without altering the shape
  * The original path is not modified
  * @param {Array<{x: number, y: number}>} path The path
  * @return {Array<{x: number, y: number}>} The compressed path
- */
-function(path){
+ */,compressPath:function(path){
 // nothing to compress
 if(path.length<3)return path;var lx,ly,ldx,ldy,sq,i,compressed=[],sx=path[0].x,sy=path[0].y,px=path[1].x,py=path[1].y,dx=px-sx,dy=py-sy;for(
 // normalize the direction
@@ -360,7 +340,7 @@ sq=Math.sqrt(dx*dx+dy*dy),
 // if the direction has changed, store the point
 (dx/=sq)===ldx&&dy===ldy||compressed.push({x:lx,y:ly});
 // store the last point
-return compressed.push({x:px,y:py}),compressed}}
+return compressed.push({x:px,y:py}),compressed}}}
 /***/,
 /***/416:
 /***/(module,__unused_webpack_exports,__webpack_require__)=>{module.exports=__webpack_require__(328);

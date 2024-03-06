@@ -1,11 +1,23 @@
-export const TOP: 'TOP';
-export const TOP_RIGHT: 'TOP_RIGHT';
-export const RIGHT: 'RIGHT';
-export const BOTTOM_RIGHT: 'BOTTOM_RIGHT';
-export const BOTTOM: 'BOTTOM';
-export const BOTTOM_LEFT: 'BOTTOM_LEFT';
-export const LEFT: 'LEFT';
-export const TOP_LEFT: 'TOP_LEFT';
+export const STOP = 0;
+export const TOP = 1;
+export const TOP_RIGHT = 2;
+export const RIGHT = 4;
+export const BOTTOM_RIGHT = 8;
+export const BOTTOM = 16;
+export const BOTTOM_LEFT = 32;
+export const LEFT = 64;
+export const TOP_LEFT = 128;
+
+export type Direction =
+  | typeof STOP
+  | typeof TOP
+  | typeof TOP_RIGHT
+  | typeof RIGHT
+  | typeof BOTTOM_RIGHT
+  | typeof BOTTOM
+  | typeof BOTTOM_LEFT
+  | typeof LEFT
+  | typeof TOP_LEFT;
 
 export const Heuristics: {
   manhattan: (dx: number, dy: number) => number;
@@ -14,6 +26,13 @@ export const Heuristics: {
   euclidean: (dx: number, dy: number) => number;
 };
 
+export const calculateDirection: (
+  X: number,
+  Y: number,
+  deltaX: number,
+  deltaY: number,
+  torusEnabled: boolean,
+) => Direction;
 export const interpolate: (x0: number, y0: number, x1: number, y1: number) => {x: number; y: number}[];
 export const compressPath: (path: {x: number; y: number}[], maxCompressedLength: number) => {x: number; y: number}[];
 export const expandPath: (path: {x: number; y: number}[]) => {x: number; y: number}[];
@@ -23,9 +42,7 @@ export const smoothenPath: (
   walkable: number[],
 ) => {x: number; y: number}[];
 
-type Direction = 'TOP' | 'TOP_RIGHT' | 'RIGHT' | 'BOTTOM_RIGHT' | 'BOTTOM' | 'BOTTOM_LEFT' | 'LEFT' | 'TOP_LEFT';
-
-export class js {
+export class EasyStar {
   /**
    * Sets the collision grid that EasyStar uses.
    *
@@ -55,7 +72,6 @@ export class js {
    * Disable diagonal pathfinding.
    */
   disableDiagonals(): void;
-
 
   /**
    * If enabled, map will be treated as a torus (wrapped map)

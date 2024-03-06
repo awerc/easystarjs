@@ -1,27 +1,32 @@
 /* eslint-disable no-param-reassign */
-/**
- *   EasyStar.js
- *   github.com/prettymuchbryce/EasyStarJS
- *   Licensed under the MIT license.
- *
- *   Implementation By Bryce Neal (@prettymuchbryce)
- * */
 
-const EasyStar = {};
 const Heap = require('heap');
 const Instance = require('./instance');
 const Node = require('./node');
 const Heuristics = require('./heuristics');
-const {compressPath, smoothenPath, expandPath, interpolate} = require('./util');
+const {
+  calculateDirection,
+  STOP,
+  TOP,
+  TOP_RIGHT,
+  RIGHT,
+  BOTTOM_RIGHT,
+  BOTTOM,
+  BOTTOM_LEFT,
+  LEFT,
+  TOP_LEFT,
+  compressPath,
+  smoothenPath,
+  expandPath,
+  interpolate,
+} = require('./util');
 
 const CLOSED_LIST = 0;
 const OPEN_LIST = 1;
 
-module.exports = EasyStar;
-
 let nextInstanceId = 1;
 
-EasyStar.js = function js() {
+function EasyStar() {
   const STRAIGHT_COST = 1.0;
   const DIAGONAL_COST = Math.SQRT2;
   let syncEnabled = false;
@@ -318,34 +323,12 @@ EasyStar.js = function js() {
     return y;
   };
 
-  /**
-   * -1, -1 | 0, -1  | 1, -1
-   * -1,  0 | SOURCE | 1,  0
-   * -1,  1 | 0,  1  | 1,  1
-   */
-  const calculateDirection = function calculateDirection(diffX, diffY) {
-    const test = (coord, limit, diff) => coord === diff || (torusEnabled && (-limit + 1) * coord === diff);
-    const testX = x => test(x, X, diffX);
-    const testY = y => test(y, Y, diffY);
-
-    if (testX(0) && testY(-1)) return EasyStar.TOP;
-    if (testX(1) && testY(-1)) return EasyStar.TOP_RIGHT;
-    if (testX(1) && testY(0)) return EasyStar.RIGHT;
-    if (testX(1) && testY(1)) return EasyStar.BOTTOM_RIGHT;
-    if (testX(0) && testY(1)) return EasyStar.BOTTOM;
-    if (testX(-1) && testY(1)) return EasyStar.BOTTOM_LEFT;
-    if (testX(-1) && testY(0)) return EasyStar.LEFT;
-    if (testX(-1) && testY(-1)) return EasyStar.TOP_LEFT;
-
-    throw new Error(`These differences are not valid: ${diffX}, ${diffY}`);
-  };
-
   // Helpers
   // eslint-disable-next-line no-shadow
   const isTileWalkable = function isTileWalkable(collisionGrid, acceptableTiles, x, y, sourceNode) {
     const directionalCondition = directionalConditions[y] && directionalConditions[y][x];
     if (directionalCondition !== undefined) {
-      const direction = calculateDirection(sourceNode.x - x, sourceNode.y - y);
+      const direction = calculateDirection(X, Y, sourceNode.x - x, sourceNode.y - y, torusEnabled);
       // eslint-disable-next-line no-bitwise
       return (direction & directionalCondition) > 0;
     }
@@ -394,10 +377,10 @@ EasyStar.js = function js() {
     }
     const simpleDistanceToTarget = getDistance(x, y, instance.endX, instance.endY);
     let costSoFar;
-    let directionFromParent = 'NONE';
+    let directionFromParent = STOP;
     let turnPenaltyCost = 0;
     if (parent !== null) {
-      directionFromParent = calculateDirection(x - parent.x, y - parent.y);
+      directionFromParent = calculateDirection(X, Y, x - parent.x, y - parent.y, torusEnabled);
       if (parent.directionFromParent !== directionFromParent) {
         turnPenaltyCost = turnPenalty;
       }
@@ -707,20 +690,25 @@ EasyStar.js = function js() {
       }
     }
   };
+}
+
+module.exports = {
+  EasyStar,
+
+  TOP,
+  TOP_RIGHT,
+  RIGHT,
+  BOTTOM_RIGHT,
+  BOTTOM,
+  BOTTOM_LEFT,
+  LEFT,
+  TOP_LEFT,
+
+  Heuristics,
+
+  calculateDirection,
+  compressPath,
+  smoothenPath,
+  expandPath,
+  interpolate,
 };
-
-EasyStar.TOP = 1;
-EasyStar.TOP_RIGHT = 2;
-EasyStar.RIGHT = 4;
-EasyStar.BOTTOM_RIGHT = 8;
-EasyStar.BOTTOM = 16;
-EasyStar.BOTTOM_LEFT = 32;
-EasyStar.LEFT = 64;
-EasyStar.TOP_LEFT = 128;
-
-EasyStar.Heuristics = Heuristics;
-
-EasyStar.compressPath = compressPath;
-EasyStar.smoothenPath = smoothenPath;
-EasyStar.expandPath = expandPath;
-EasyStar.interpolate = interpolate;

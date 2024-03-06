@@ -1,3 +1,46 @@
+const STOP = 0;
+const TOP = 1;
+const TOP_RIGHT = 2;
+const RIGHT = 4;
+const BOTTOM_RIGHT = 8;
+const BOTTOM = 16;
+const BOTTOM_LEFT = 32;
+const LEFT = 64;
+const TOP_LEFT = 128;
+
+/**
+ * -1, -1 | 0, -1  | 1, -1
+ * -1,  0 | SOURCE | 1,  0
+ * -1,  1 | 0,  1  | 1,  1
+ @param {number} X width of map
+ @param {number} Y heogth of map
+ @param {number} deltaX diff on x-axis
+ @param {number} deltaY diff on y-axis
+ @param {boolean} torusEnabled if enabled, map will be treated as a torus (wrapped map)
+ @return {number} Direction
+ */
+
+function calculateDirection(X, Y, deltaX, deltaY, torusEnabled) {
+  const test = (coord, limit, diff) => coord === diff || (torusEnabled && (-limit + 1) * coord === diff);
+  const testX = x => test(x, X, deltaX);
+  const testY = y => test(y, Y, deltaY);
+
+  if (testX(0) && testY(-1)) return TOP;
+  if (testX(1) && testY(-1)) return TOP_RIGHT;
+  if (testX(1) && testY(0)) return RIGHT;
+  if (testX(1) && testY(1)) return BOTTOM_RIGHT;
+  if (testX(0) && testY(1)) return BOTTOM;
+  if (testX(-1) && testY(1)) return BOTTOM_LEFT;
+  if (testX(-1) && testY(0)) return LEFT;
+  if (testX(-1) && testY(-1)) return TOP_LEFT;
+
+  if (deltaX === 0 && deltaY === 0) return STOP;
+  if (deltaX === 0) return deltaY > 0 ? BOTTOM : TOP;
+  if (deltaY === 0) return deltaX > 0 ? RIGHT : LEFT;
+  if (deltaY > 0) return deltaX > 0 ? BOTTOM_RIGHT : BOTTOM_LEFT;
+  return deltaX > 0 ? TOP_RIGHT : TOP_LEFT;
+}
+
 /**
  * Given the start and end coordinates, return all the coordinates lying
  * on the line formed by these coordinates, based on Bresenham's algorithm.
@@ -44,7 +87,6 @@ function interpolate(x0, y0, x1, y1) {
 
   return line;
 }
-exports.interpolate = interpolate;
 
 /**
  * Given a compressed path, return a new path that has all the segments
@@ -80,7 +122,6 @@ function expandPath(path) {
 
   return expanded;
 }
-exports.expandPath = expandPath;
 
 /**
  * Smoothen the give path.
@@ -88,8 +129,11 @@ exports.expandPath = expandPath;
  * @param {Array<Array<number>>} grid
  * @param {Array<{x: number, y: number}>} path The path
  * @param {Array<number>} walkable Walkable ids
+ * @param {boolean} diagonalsEnabled Is diagonal movements enabled
  */
-function smoothenPath(grid, path, walkable) {
+
+// TODO enableDiagonals
+function smoothenPath(grid, path, walkable, diagonalsEnabled) {
   const newPath = [...path];
 
   for (let i = 1; i < newPath.length - 1; i++) {
@@ -127,7 +171,6 @@ function smoothenPath(grid, path, walkable) {
 
   return newPath;
 }
-exports.smoothenPath = smoothenPath;
 
 /**
  * Compress a path, remove redundant nodes without altering the shape
@@ -197,4 +240,19 @@ function compressPath(path) {
   return compressed;
 }
 
-exports.compressPath = compressPath;
+module.exports = {
+  STOP,
+  TOP,
+  TOP_RIGHT,
+  RIGHT,
+  BOTTOM_RIGHT,
+  BOTTOM,
+  BOTTOM_LEFT,
+  LEFT,
+  TOP_LEFT,
+  calculateDirection,
+  interpolate,
+  expandPath,
+  smoothenPath,
+  compressPath,
+};
