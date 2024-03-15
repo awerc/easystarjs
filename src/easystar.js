@@ -470,7 +470,7 @@ function EasyStar() {
 
     // Start and end are the same tile.
     if (startX === endX && startY === endY) {
-      callbackWrapper([]);
+      callbackWrapper([{x: startX, y: startY}]);
       return undefined;
     }
 
@@ -695,6 +695,7 @@ function EasyStar() {
 module.exports = {
   EasyStar,
 
+  STOP,
   TOP,
   TOP_RIGHT,
   RIGHT,
